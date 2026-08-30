@@ -4,8 +4,8 @@
  * there is no per-theme component, route or board.
  */
 :root,
-:root[data-theme='solent'] {
-  /* Solent: night water off Southampton. */
+:root[data-theme='armada'] {
+  /* Armada: night water off Southampton. */
   --hull: #070b10;
   --hull-image:
     radial-gradient(120% 80% at 50% -10%, #0d1620 0%, var(--hull) 60%),

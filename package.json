@@ -1,5 +1,5 @@
 {
-  "name": "solent",
+  "name": "armada",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sim": "vite-node scripts/simulate.ts"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "^5.3.0",
@@ -35,6 +36,7 @@
     "oxlint": "^1.79.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.2",
+    "vite-node": "^6.0.0",
     "vitest": "^4.1.11"
   }
 }

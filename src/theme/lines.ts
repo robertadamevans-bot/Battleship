@@ -14,6 +14,11 @@ export function resolutionLine(entry: LogEntry, copy: ThemeCopy): string {
   const mine = entry.by === 'human'
   const ship = entry.result.shipId ? shipName(entry.result.shipId, copy) : ''
 
+  // A decoy is never named: the commander is told there was something there.
+  if (entry.result.decoy) {
+    return entry.result.outcome === 'sunk' ? copy.ghostSunk(where) : copy.ghostHit(where)
+  }
+
   switch (entry.result.outcome) {
     case 'miss':
       return mine ? copy.miss(where) : copy.theirMiss(where)

@@ -1,14 +1,16 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
+import { ruleset, type DifficultyId } from '../game/rules'
 import Deployment from './Deployment'
 
-function setup() {
+function setup(rank: DifficultyId = 'officer') {
   const user = userEvent.setup()
   const engaged: unknown[] = []
   render(
     <Deployment
       commander="Rob"
+      rules={ruleset(rank)}
       initial={[]}
       onEngage={(placements) => engaged.push(placements)}
       onBack={() => {}}
@@ -66,5 +68,39 @@ describe('deployment', () => {
     await user.click(screen.getByRole('button', { name: 'A1 unfired' }))
 
     expect(screen.getByRole('button', { name: 'A5 your ship' })).toBeTruthy()
+  })
+})
+
+describe('deployment follows the rank', () => {
+  it('lays out Cadet on twelve columns and forbids touching', async () => {
+    const { user } = setup('cadet')
+
+    expect(screen.getByRole('button', { name: 'L12 unfired' })).toBeTruthy()
+    expect(screen.getByText(/not even corners/i)).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: 'A1 unfired' })) // carrier A1–E1
+    await user.click(screen.getByRole('button', { name: /^Battleship/ }))
+    await user.click(screen.getByRole('button', { name: 'A2 unfired' })) // king-adjacent
+
+    expect(screen.getByText(/not even corners/i)).toBeTruthy()
+    expect(screen.getByRole('button', { name: /ships placed/i }).textContent).toMatch(/1\/5/)
+  })
+
+  it('states the Commander cell count and shot budget on a 9×9 board', () => {
+    setup('commander')
+
+    expect(screen.getByText(/19 cells\. 42 shots\./)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'J1 unfired' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'I9 unfired' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /^Patrol/ })).toBeTruthy()
+  })
+
+  it('keeps the human fleet on ten by ten at Fleet Legend', () => {
+    setup('legend')
+
+    expect(screen.getByRole('button', { name: 'J10 unfired' })).toBeTruthy()
+    expect(screen.getByText(/17 cells\./)).toBeTruthy()
+    // Decoys are North's business: they are never in the player's tray.
+    expect(screen.queryByRole('button', { name: /ghost/i })).toBeNull()
   })
 })

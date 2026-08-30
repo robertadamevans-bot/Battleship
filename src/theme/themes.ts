@@ -1,10 +1,10 @@
 import type { ShipId } from '../game/types'
 
-export const THEMES = ['solent', 'olde', 'warfare', 'pirates'] as const
+export const THEMES = ['armada', 'olde', 'warfare', 'pirates'] as const
 
 export type Theme = (typeof THEMES)[number]
 
-export const DEFAULT_THEME: Theme = 'solent'
+export const DEFAULT_THEME: Theme = 'armada'
 
 export interface ThemeSpec {
   id: Theme
@@ -18,8 +18,8 @@ export interface ThemeSpec {
 
 export const THEME_SPECS: readonly ThemeSpec[] = [
   {
-    id: 'solent',
-    name: 'Solent',
+    id: 'armada',
+    name: 'Armada',
     flavour: 'Cold water. Short orders.',
     swatch: ['#101820', '#c8102e', '#7c9a82'],
   },
@@ -69,12 +69,23 @@ export interface ThemeCopy {
   shipAlias: ShipAlias
   /** Deployment's one-line reminder of the placement rules. */
   rules: string
+  /** The same reminder when hulls may not touch at all. */
+  spacedRules: string
   /** Holding line before the first shot resolves. */
   waiting: string
   /** After-action closing line. */
   closing: (won: boolean) => string
   rematch: string
   standDown: string
+  /** Rank furniture: the match-shot budget, the clock, decoys and one life. */
+  powderLabel: string
+  clockLabel: string
+  powderSpent: string
+  timeUp: string
+  oneLifeBanner: string
+  oneLifeLoss: (shipAlias: string) => string
+  ghostHit: (coord: string) => string
+  ghostSunk: (coord: string) => string
 }
 
 const MODERN_SHIPS: ShipAlias = {
@@ -83,10 +94,13 @@ const MODERN_SHIPS: ShipAlias = {
   cruiser: 'Cruiser',
   submarine: 'Submarine',
   destroyer: 'Destroyer',
+  patrol: 'Patrol',
+  'decoy-a': 'Ghost',
+  'decoy-b': 'Ghost',
 }
 
 export const themeCopy: Record<Theme, ThemeCopy> = {
-  solent: {
+  armada: {
     primaryCta: 'Deploy fleet',
     engage: 'Engage',
     miss: (c) => `${c} miss`,
@@ -98,14 +112,23 @@ export const themeCopy: Record<Theme, ThemeCopy> = {
     aiName: 'Admiral North',
     yourTurn: (commander) => `${commander} to fire`,
     theirTurn: 'Admiral North ranging',
-    youWin: 'holds the Solent',
-    youLose: 'Admiral North holds the Solent',
+    youWin: 'holds the water',
+    youLose: 'Admiral North holds the water',
     shipAlias: MODERN_SHIPS,
     rules: 'Horizontal or vertical. No overlap. Touching allowed.',
+    spacedRules: 'Horizontal or vertical. No touching, not even corners.',
     waiting: 'Open fire when ready.',
     closing: () => 'The water is quiet again.',
     rematch: 'Rematch',
     standDown: 'New briefing',
+    powderLabel: 'Shots',
+    clockLabel: 'Clock',
+    powderSpent: 'Shots spent. The action is lost.',
+    timeUp: 'Time. Shot chosen for you.',
+    oneLifeBanner: 'One life. The first ship you lose ends it.',
+    oneLifeLoss: (ship) => `Your ${ship} is gone. One life. Action over.`,
+    ghostHit: (c) => `${c} — ghost contact`,
+    ghostSunk: (c) => `${c} — decoy struck`,
   },
   olde: {
     primaryCta: 'Deploy thy fleet',
@@ -127,12 +150,24 @@ export const themeCopy: Record<Theme, ThemeCopy> = {
       cruiser: 'Frigate',
       submarine: 'Bomb Ketch',
       destroyer: 'Sloop',
+      patrol: 'Cutter',
+      'decoy-a': 'Phantom',
+      'decoy-b': 'Phantom',
     },
     rules: 'Athwart or along. No two ships in one berth. Touching permitted.',
+    spacedRules: 'Athwart or along. Clear water all round, corners besides.',
     waiting: 'Await thy order.',
     closing: () => 'The action is concluded.',
     rematch: 'Engage again',
     standDown: 'Return to the briefing',
+    powderLabel: 'Powder',
+    clockLabel: 'Glass',
+    powderSpent: 'Powder spent. The action is lost.',
+    timeUp: 'The glass is run. A shot is taken for thee.',
+    oneLifeBanner: 'One life. The first ship lost concludes the action.',
+    oneLifeLoss: (ship) => `Thy ${ship} is lost. One life. The action is over.`,
+    ghostHit: (c) => `${c} — a phantom on the chart`,
+    ghostSunk: (c) => `${c} — a phantom, nothing more`,
   },
   warfare: {
     primaryCta: 'Deploy fleet',
@@ -150,10 +185,19 @@ export const themeCopy: Record<Theme, ThemeCopy> = {
     youLose: 'Action complete. Fleet status: lost.',
     shipAlias: MODERN_SHIPS,
     rules: 'Axis locked to grid. No overlap. Adjacency permitted.',
+    spacedRules: 'Axis locked to grid. One cell separation, diagonals included.',
     waiting: 'Weapons free.',
     closing: () => 'Action complete. Fleet status attached.',
     rematch: 'Re-engage',
     standDown: 'New tasking',
+    powderLabel: 'Salvo',
+    clockLabel: 'T-minus',
+    powderSpent: 'SALVO EXPENDED. ACTION LOST.',
+    timeUp: 'TIME. SHOT RESOLVED FOR YOU.',
+    oneLifeBanner: 'ONE LIFE. FIRST UNIT LOST ENDS THE ACTION.',
+    oneLifeLoss: (ship) => `OWN UNIT LOST — ${ship.toLowerCase()}. ONE LIFE. ACTION OVER.`,
+    ghostHit: (c) => `${c} unresolved contact`,
+    ghostSunk: (c) => `${c} contact resolved — decoy`,
   },
   pirates: {
     primaryCta: 'Weigh anchor',
@@ -175,11 +219,23 @@ export const themeCopy: Record<Theme, ThemeCopy> = {
       cruiser: 'Brig',
       submarine: 'Phantom',
       destroyer: 'Sloop',
+      patrol: 'Cutter',
+      'decoy-a': 'Ghost ship',
+      'decoy-b': 'Ghost ship',
     },
     rules: 'Along or athwart. No two hulls in one berth. Touching allowed.',
+    spacedRules: 'Along or athwart. Clear water all round, corners and all.',
     waiting: 'Wait for the word.',
     closing: (won) => (won ? 'The prize is yours.' : 'Your colours are struck.'),
     rematch: 'Weigh anchor again',
     standDown: 'Strike colours',
+    powderLabel: 'Powder',
+    clockLabel: 'Sand',
+    powderSpent: 'Powder gone. The action is lost.',
+    timeUp: 'The sand ran out. A shot goes off regardless.',
+    oneLifeBanner: 'One life. Lose one hull and it is over.',
+    oneLifeLoss: (ship) => `Your ${ship} is gone. One life. It is over.`,
+    ghostHit: (c) => `${c} — ghost contact`,
+    ghostSunk: (c) => `${c} — a ghost ship, no prize`,
   },
 }
