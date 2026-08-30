@@ -260,3 +260,29 @@ only asymmetric one.
 
 **Kept fixed by.** `src/game/rules.test.ts` asserts the five badges are exactly `12×12`, `10×10`,
 `9×9`, `10×10 fog` and `10×10 / 8×12`.
+---
+
+## 15. Cadet's wide board pushed a 320px phone sideways
+
+**Symptom.** On the deployment screen at a 320px viewport — an iPhone SE in portrait — the page
+scrolled horizontally: `document.body.scrollWidth` measured 335 against a 320 client width. The
+right-hand column of the 12×12 grid and the right edge of the Rotate/Randomise/Clear row sat off
+screen. The action screen was fine, and 390px and 440px were fine, so it only showed on the widest
+rank at the narrowest width.
+
+**Cause.** Not the board's own width — the board is `width: 100%`. `.grid` carries
+`aspect-ratio: cols / rows`, and an aspect-ratio box's automatic minimum size is derived from its
+content in the other axis: twelve implicit rows of a button's line-height gave a 321px minimum
+width, which the `1fr` tracks of `.body`, `.layout` and `.side` then honoured, because a bare
+`1fr` track is `minmax(auto, 1fr)` and `auto` never shrinks below that minimum. The side column's
+own width was the correct 292px while its grid track was still sized at 321px, so the fleet tray
+and the controls overflowed their own parent.
+
+**Fix.** Every track that has to be able to shrink is now `minmax(0, 1fr)` — the board's columns
+and cells, `.body`, `.layout`, `.side`, `.tray`, `.trayItem` and `.controls` — and `.grid` also
+carries `min-width: 0` and `grid-auto-rows: minmax(0, 1fr)` so the row heights follow the aspect
+ratio instead of the cells' line-height.
+
+**Kept fixed by.** The scripted narrow-viewport pass (`qa/narrow.mjs` in the QA harness) walks the
+deployment screen of the widest rank at 320, 390 and 440px and fails on any element whose
+right edge exceeds the viewport.
