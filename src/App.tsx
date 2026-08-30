@@ -7,6 +7,8 @@ import AfterAction from './screens/AfterAction'
 import Briefing, { type Settings } from './screens/Briefing'
 import Deployment from './screens/Deployment'
 import { play } from './sound'
+import { rememberCommander, storedCommander } from './theme/storage'
+import { useTheme } from './theme/useTheme'
 
 type Phase = 'briefing' | 'deployment' | 'action' | 'afteraction'
 
@@ -18,12 +20,13 @@ const RESOLVE = 260
 const END_BEAT = 900
 
 export default function App() {
+  const { theme } = useTheme()
   const [phase, setPhase] = useState<Phase>('briefing')
-  const [settings, setSettings] = useState<Settings>({
-    name: 'Rob',
+  const [settings, setSettings] = useState<Settings>(() => ({
+    name: storedCommander('Rob'),
     difficulty: 'admiral',
     sound: false,
-  })
+  }))
   const [fleet, setFleet] = useState<Placement[]>([])
   const [match, setMatch] = useState<Match | null>(null)
   const [resolving, setResolving] = useState(false)
@@ -56,10 +59,10 @@ export default function App() {
       setMatch(turn.match)
       setResolving(true)
       later(() => setResolving(false), RESOLVE)
-      play(turn.result.outcome, settings.sound)
+      play(turn.result.outcome, settings.sound, theme)
       if (turn.match.winner) later(() => setPhase('afteraction'), END_BEAT)
     },
-    [match, locked, later, settings.sound],
+    [match, locked, later, settings.sound, theme],
   )
 
   // Admiral North's turn: a deliberate pause, then one shot.
@@ -72,13 +75,13 @@ export default function App() {
         if (!turn) return
         setLastAiShot(turn.result.cell)
         setMatch(turn.match)
-        play(turn.match.winner ? 'lose' : turn.result.outcome, settings.sound)
+        play(turn.match.winner ? 'lose' : turn.result.outcome, settings.sound, theme)
         if (turn.match.winner) later(() => setPhase('afteraction'), END_BEAT)
       },
       THINK_MIN + Math.random() * THINK_SPREAD,
     )
     return () => window.clearTimeout(id)
-  }, [match, phase, later, settings.sound])
+  }, [match, phase, later, settings.sound, theme])
 
   function beginMatch(placements: Placement[]) {
     setFleet(placements)
@@ -94,6 +97,7 @@ export default function App() {
       settings={settings}
       onDeploy={(next) => {
         setSettings(next)
+        rememberCommander(next.name)
         setPhase('deployment')
       }}
     />

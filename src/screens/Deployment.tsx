@@ -4,6 +4,7 @@ import type { CellView } from '../game/views'
 import { key, shipCells } from '../game/geometry'
 import { checkPlacement, randomFleet, withPlacement } from '../game/placement'
 import { FLEET, type Cell, type Orientation, type Placement, type ShipId } from '../game/types'
+import { useTheme } from '../theme/useTheme'
 import styles from './Deployment.module.css'
 
 interface DeploymentProps {
@@ -17,6 +18,8 @@ const nextUnplaced = (placements: Placement[]): ShipId | null =>
   FLEET.find((s) => !placements.some((p) => p.id === s.id))?.id ?? null
 
 export default function Deployment({ commander, initial, onEngage, onBack }: DeploymentProps) {
+  const { copy } = useTheme()
+  const alias = copy.shipAlias
   const [placements, setPlacements] = useState<Placement[]>(initial)
   const [selected, setSelected] = useState<ShipId | null>(
     nextUnplaced(initial) ?? FLEET[0].id,
@@ -56,7 +59,7 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
     setSelected(following)
     setMessage(
       following
-        ? `${FLEET.find((s) => s.id === following)!.name} next.`
+        ? `${alias[following]} next.`
         : 'Fleet deployed. Engage when ready.',
     )
   }
@@ -68,7 +71,7 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
     // Pressing a placed ship selects it; dragging away moves it.
     setSelected(occupant.id)
     setOrientation(occupant.orientation)
-    setMessage(`${FLEET.find((s) => s.id === occupant.id)!.name} selected. Drag or tap to move it.`)
+    setMessage(`${alias[occupant.id]} selected. Drag or tap to move it.`)
   }
 
   function onCellRelease(cell: Cell) {
@@ -123,7 +126,7 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
         </button>
       </header>
 
-      <p className={styles.rules}>Horizontal or vertical. No overlap. Touching allowed.</p>
+      <p className={styles.rules}>{copy.rules}</p>
 
       <div className={styles.layout}>
         <div className={styles.boardWrap}>
@@ -156,12 +159,12 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
                       setSelected(ship.id)
                       setMessage(
                         done
-                          ? `Tap the water to move the ${ship.name}.`
-                          : `Tap a stem cell for the ${ship.name}.`,
+                          ? `Tap the water to move the ${alias[ship.id]}.`
+                          : `Tap a stem cell for the ${alias[ship.id]}.`,
                       )
                     }}
                   >
-                    <span className={styles.shipName}>{ship.name}</span>
+                    <span className={styles.shipName}>{alias[ship.id]}</span>
                     <span className={styles.marks} aria-hidden="true">
                       {Array.from({ length: ship.length }, (_, i) => (
                         <i key={i} />
@@ -196,7 +199,7 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
               onClick={() => {
                 setPlacements([])
                 setSelected(FLEET[0].id)
-                setMessage('Board cleared. Carrier first.')
+                setMessage(`Board cleared. ${alias.carrier} first.`)
               }}
             >
               Reset
@@ -213,7 +216,7 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
             disabled={!ready}
             onClick={() => ready && onEngage(placements)}
           >
-            {ready ? 'Engage' : `${placed}/5 ships placed`}
+            {ready ? copy.engage : `${placed}/5 ships placed`}
           </button>
         </div>
       </div>

@@ -3,6 +3,9 @@ import FleetStrip from '../components/FleetStrip'
 import { fireView, fleetView } from '../game/views'
 import { shotsFired, type Match } from '../game/match'
 import type { Cell } from '../game/types'
+import { resolutionLine } from '../theme/lines'
+import TheatreSwitch from '../theme/TheatreSwitch'
+import { useTheme } from '../theme/useTheme'
 import styles from './Action.module.css'
 
 interface ActionProps {
@@ -23,9 +26,10 @@ export default function Action({
   lastAiShot,
   onFire,
 }: ActionProps) {
+  const { copy } = useTheme()
   const shots = shotsFired(match)
-  const banner =
-    match.turn === 'ai' ? 'Admiral North ranging' : `${commander} to fire`
+  const banner = match.turn === 'ai' ? copy.theirTurn : copy.yourTurn(commander)
+  const latest = match.log[0]
 
   return (
     <main className={styles.screen}>
@@ -34,6 +38,7 @@ export default function Action({
         <span className={`${styles.shots} mono-num`}>
           {commander} {shots.human} · North {shots.ai}
         </span>
+        <TheatreSwitch />
       </header>
 
       <div className={styles.status}>
@@ -42,7 +47,7 @@ export default function Action({
           {banner}
         </p>
         <p className={styles.resolution} role="status" aria-live="polite">
-          {match.log[0] ?? 'Open fire when ready.'}
+          {latest ? resolutionLine(latest, copy) : copy.waiting}
         </p>
       </div>
 
@@ -50,7 +55,7 @@ export default function Action({
         <section className={styles.primary}>
           <h2 className={styles.boardTitle}>
             <span className="eyebrow">Fire</span>
-            Admiral North&rsquo;s water
+            {copy.aiName}
           </h2>
           <Board
             name="Admiral North's water — choose a target"
@@ -82,8 +87,10 @@ export default function Action({
         <details className={styles.logWrap}>
           <summary className="eyebrow">Signal log</summary>
           <ol className={styles.log}>
-            {match.log.slice(0, 12).map((line, i) => (
-              <li key={`${line}-${i}`}>{line}</li>
+            {match.log.slice(0, 12).map((entry, i) => (
+              <li key={`${entry.result.cell.row}-${entry.result.cell.col}-${entry.by}-${i}`}>
+                {resolutionLine(entry, copy)}
+              </li>
             ))}
           </ol>
         </details>

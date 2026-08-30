@@ -1,4 +1,5 @@
 import { FLEET, type ShipId } from '../game/types'
+import { useTheme } from '../theme/useTheme'
 import styles from './FleetStrip.module.css'
 
 interface FleetStripProps {
@@ -7,6 +8,7 @@ interface FleetStripProps {
 }
 
 export default function FleetStrip({ title, sunk }: FleetStripProps) {
+  const { copy } = useTheme()
   const lost = sunk.length
   return (
     <section className={styles.strip}>
@@ -21,7 +23,7 @@ export default function FleetStrip({ title, sunk }: FleetStripProps) {
           const down = sunk.includes(ship.id)
           return (
             <li key={ship.id} className={down ? styles.down : undefined}>
-              <span className={styles.name}>{ship.name}</span>
+              <span className={styles.name}>{copy.shipAlias[ship.id]}</span>
               <span className={styles.pips} aria-hidden="true">
                 {Array.from({ length: ship.length }, (_, i) => (
                   <i key={i} />

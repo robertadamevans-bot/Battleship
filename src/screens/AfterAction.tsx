@@ -3,6 +3,7 @@ import FleetStrip from '../components/FleetStrip'
 import { shotsFired, type Match } from '../game/match'
 import { FLEET } from '../game/types'
 import { fireView } from '../game/views'
+import { useTheme } from '../theme/useTheme'
 import styles from './AfterAction.module.css'
 
 interface AfterActionProps {
@@ -18,6 +19,7 @@ export default function AfterAction({
   onRematch,
   onNewBriefing,
 }: AfterActionProps) {
+  const { copy } = useTheme()
   const shots = shotsFired(match)
   const humanWon = match.winner === 'human'
   const survivors = {
@@ -28,9 +30,9 @@ export default function AfterAction({
   return (
     <main className={styles.screen}>
       <header className={styles.head}>
-        <span className="eyebrow">After action</span>
+        <span className="eyebrow">{copy.closing(humanWon)}</span>
         <h1 className={`wordmark ${styles.verdict} ${humanWon ? styles.win : styles.loss}`}>
-          {humanWon ? `${commander} holds the Solent` : 'Admiral North holds the Solent'}
+          {humanWon ? `${commander} ${copy.youWin}` : copy.youLose}
         </h1>
         <p className={styles.line}>
           {humanWon
@@ -65,7 +67,7 @@ export default function AfterAction({
       <section className={styles.reveal}>
         <h2 className={styles.boardTitle}>
           <span className="eyebrow">Reveal</span>
-          Admiral North&rsquo;s fleet
+          {copy.aiName}
         </h2>
         <Board name="Admiral North's revealed fleet" views={fireView(match.enemy, true)} interactive={false} />
         <div className={styles.strips}>
@@ -76,10 +78,10 @@ export default function AfterAction({
 
       <div className={styles.actions}>
         <button type="button" className="btn btn-primary" onClick={onRematch}>
-          Rematch
+          {copy.rematch}
         </button>
         <button type="button" className="btn" onClick={onNewBriefing}>
-          New briefing
+          {copy.standDown}
         </button>
       </div>
     </main>

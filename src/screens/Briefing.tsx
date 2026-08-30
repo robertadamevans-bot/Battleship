@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { Difficulty } from '../ai/admiral'
+import { useTheme } from '../theme/useTheme'
+import { THEME_SPECS } from '../theme/themes'
 import styles from './Briefing.module.css'
 
 export interface Settings {
@@ -18,7 +20,11 @@ const DIFFICULTIES: { id: Difficulty; label: string; note: string }[] = [
   { id: 'cadet', label: 'Cadet', note: 'Hunt and target, but fires without reading the water.' },
 ]
 
+/** Nine cells of the theatre's palette: water, water, hit, miss and so on. */
+const MINI: readonly number[] = [0, 0, 1, 0, 2, 0, 0, 0, 1]
+
 export default function Briefing({ settings, onDeploy }: BriefingProps) {
+  const { theme, setTheme, copy } = useTheme()
   const [name, setName] = useState(settings.name)
   const [difficulty, setDifficulty] = useState<Difficulty>(settings.difficulty)
   const [sound, setSound] = useState(settings.sound)
@@ -29,7 +35,7 @@ export default function Briefing({ settings, onDeploy }: BriefingProps) {
     <main className={styles.screen}>
       <div className={styles.card}>
         <header className={styles.head}>
-          <h1 className={`wordmark ${styles.mark}`}>Solent</h1>
+          <h1 className={`wordmark sway ${styles.mark}`}>Solent</h1>
           <p className={styles.tagline}>Fleet action. Human vs machine.</p>
         </header>
 
@@ -56,6 +62,31 @@ export default function Briefing({ settings, onDeploy }: BriefingProps) {
               onChange={(event) => setName(event.target.value)}
             />
           </label>
+
+          <fieldset className={styles.field}>
+            <legend className="eyebrow">Theatre</legend>
+            <div className={styles.theatre}>
+              {THEME_SPECS.map((spec) => (
+                <button
+                  key={spec.id}
+                  type="button"
+                  className={styles.chip}
+                  aria-pressed={theme === spec.id}
+                  onClick={() => setTheme(spec.id)}
+                >
+                  <span className={styles.mini} aria-hidden="true">
+                    {MINI.map((slot, i) => (
+                      <i key={i} style={{ background: spec.swatch[slot] }} />
+                    ))}
+                  </span>
+                  <span>
+                    <span className={styles.chipName}>{spec.name}</span>
+                    <span className={styles.chipFlavour}>{spec.flavour}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </fieldset>
 
           <fieldset className={styles.field}>
             <legend className="eyebrow">Opponent</legend>
@@ -94,7 +125,7 @@ export default function Briefing({ settings, onDeploy }: BriefingProps) {
           </div>
 
           <button type="submit" className={`btn btn-primary ${styles.deploy}`}>
-            Deploy fleet
+            {copy.primaryCta}
           </button>
         </form>
 
