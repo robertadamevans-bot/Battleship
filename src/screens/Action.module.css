@@ -5,10 +5,15 @@
 
 .head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: 8px;
   border-bottom: 1px solid var(--line);
   padding-bottom: 8px;
+}
+
+.shots {
+  margin-left: auto;
 }
 
 .mark {
@@ -45,7 +50,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--channel);
+  background: var(--miss);
 }
 
 .waiting {
@@ -53,7 +58,7 @@
 }
 
 .waiting .pip {
-  background: var(--red);
+  background: var(--hit);
   animation: pulse 900ms var(--ease) infinite;
 }
 

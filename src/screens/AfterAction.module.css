@@ -19,7 +19,7 @@
 }
 
 .loss {
-  color: var(--red);
+  color: var(--hit);
 }
 
 .line {

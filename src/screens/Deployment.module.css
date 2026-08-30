@@ -64,7 +64,8 @@
   gap: 10px;
   padding: 0 12px;
   border: 1px solid var(--line);
-  background: rgba(16, 24, 32, 0.55);
+  background-color: var(--panel);
+  background-image: var(--panel-image);
   text-align: left;
 }
 
@@ -73,8 +74,8 @@
 }
 
 .trayItem.active {
-  border-color: var(--red);
-  background: rgba(200, 16, 46, 0.12);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .trayItem.done .shipName {
@@ -94,16 +95,16 @@
 .marks i {
   width: 8px;
   height: 8px;
-  background: #33414e;
+  background: color-mix(in srgb, var(--paper) 22%, transparent);
   border-radius: 1px;
 }
 
 .active .marks i {
-  background: var(--red);
+  background: var(--accent);
 }
 
 .done .marks i {
-  background: var(--channel);
+  background: var(--miss);
 }
 
 .status {
@@ -131,7 +132,7 @@
   font-size: 12.5px;
   color: var(--fog-bright);
   min-height: 36px;
-  border-left: 2px solid var(--red);
+  border-left: 2px solid var(--hit);
   padding-left: 10px;
 }
 

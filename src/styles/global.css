@@ -1,25 +1,294 @@
-:root {
-  /* Solent palette: night water off Southampton. */
+/*
+ * Every colour, face, radius and duration in the app comes from a token below.
+ * A theme is one `data-theme` attribute on <html> overriding those tokens —
+ * there is no per-theme component, route or board.
+ */
+:root,
+:root[data-theme='solent'] {
+  /* Solent: night water off Southampton. */
   --hull: #070b10;
+  --hull-image:
+    radial-gradient(120% 80% at 50% -10%, #0d1620 0%, var(--hull) 60%),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 3px);
+  --panel: rgba(16, 24, 32, 0.6);
+  --panel-image: none;
+  --panel-radius: 3px;
+
   --water: #101820;
-  --water-lit: #16212b;
+  --water-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.25)),
+    radial-gradient(140% 100% at 20% 0%, rgba(124, 154, 130, 0.06), transparent 60%);
+  --water-hover: rgba(226, 232, 236, 0.09);
+  --board-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 10px 30px rgba(0, 0, 0, 0.45);
+  --board-frame: 1px solid var(--line-strong);
+
   --line: rgba(226, 232, 236, 0.14);
   --line-strong: rgba(226, 232, 236, 0.28);
   --fog: #8b97a1;
+  --fog-dim: #4d5a66;
   --fog-bright: #c3ccd3;
   --paper: #e8edf1;
-  --red: #c8102e;
-  --red-dim: #8c0b20;
-  --channel: #7c9a82;
+
+  --accent: #c8102e;
+  --accent-hot: #e11733;
+  --accent-ink: #fff;
+
+  --hit: #c8102e;
+  --hit-dim: #8c0b20;
+  --hit-clip: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  --miss: #7c9a82;
+  --miss-radius: 50%;
+  --miss-fill: transparent;
+  --ship-a: #2b3946;
+  --ship-b: #1d2833;
+  --ship-lost: #46101c;
+  --ghost: rgba(124, 154, 130, 0.35);
+
+  /* The chart is the board plus its coordinate gutters; usually it is just
+     the page, but a theme may make it a physical surface of its own. */
+  --chart-bg: transparent;
+  --chart-pad: 0px;
+  --chart-line: var(--line);
+  --chart-line-strong: var(--line-strong);
+  --chart-ink: var(--paper);
+  --chart-ink-soft: var(--fog);
 
   --gap: 12px;
   --radius: 3px;
+  --btn-radius: 3px;
+  --btn-tracking: 0.1em;
+  --btn-transform: uppercase;
+  --btn-face: var(--font-ui);
+  --dur: 180ms;
+  --dur-slow: 200ms;
   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
 
+  --font-ui: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Archivo Variable', 'IBM Plex Sans', sans-serif;
+  --font-num: var(--font-ui);
+  --display-variation: 'wdth' 82, 'wght' 700;
+  --display-tracking: 0.24em;
+  --display-transform: uppercase;
+  --display-weight: 700;
+  --label-caps: none;
+
   color-scheme: dark;
-  font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-ui);
   font-synthesis-weight: none;
   -webkit-text-size-adjust: 100%;
+}
+
+/* ------------------------------------------------------------------ *
+ * Ye Olde Times — dark oak chrome, parchment charts, brass hairlines. *
+ * ------------------------------------------------------------------ */
+:root[data-theme='olde'] {
+  --hull: #1a1410;
+  --hull-image:
+    radial-gradient(120% 90% at 50% -10%, #2a211a 0%, var(--hull) 65%),
+    repeating-linear-gradient(92deg, rgba(0, 0, 0, 0.16) 0 2px, transparent 2px 7px);
+  --panel: rgba(38, 29, 21, 0.74);
+  --panel-image:
+    repeating-linear-gradient(0deg, rgba(231, 216, 184, 0.025) 0 1px, transparent 1px 4px);
+  --panel-radius: 2px;
+
+  --water: #e2d1ad;
+  --water-image:
+    repeating-linear-gradient(0deg, rgba(43, 33, 24, 0.05) 0 1px, transparent 1px 5px),
+    radial-gradient(130% 110% at 20% 0%, rgba(255, 252, 240, 0.55), transparent 65%);
+  --water-hover: rgba(43, 33, 24, 0.12);
+  --board-shadow:
+    inset 0 0 0 1px rgba(43, 33, 24, 0.35),
+    0 8px 24px rgba(0, 0, 0, 0.55);
+  --board-frame: 2px solid var(--accent);
+
+  --line: rgba(196, 163, 90, 0.3);
+  --line-strong: rgba(196, 163, 90, 0.55);
+  --fog: #a89a7e;
+  --fog-dim: #7d7160;
+  --fog-bright: #e7d8b8;
+  --paper: #ede2c8;
+
+  /* The chart itself is parchment, so everything drawn on it is ink. */
+  --chart-bg: #e7d8b8;
+  --chart-pad: 8px;
+  --chart-line: rgba(43, 33, 24, 0.24);
+  --chart-line-strong: rgba(43, 33, 24, 0.45);
+  --chart-ink: #2b2118;
+  --chart-ink-soft: #6e6a60;
+
+  --accent: #c4a35a;
+  --accent-hot: #d9b96f;
+  --accent-ink: #201810;
+
+  --hit: #8b1e1e;
+  --hit-dim: #5e1212;
+  --hit-clip: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  --miss: #6e6a60;
+  --miss-radius: 50%;
+  --miss-fill: rgba(110, 106, 96, 0.25);
+  --ship-a: #3b2f22;
+  --ship-b: #2b2118;
+  --ship-lost: #5e1212;
+  --ghost: rgba(196, 163, 90, 0.45);
+
+  --btn-radius: 1px;
+  --btn-tracking: 0.16em;
+  --btn-transform: uppercase;
+  --dur: 240ms;
+  --dur-slow: 280ms;
+  --ease: cubic-bezier(0.4, 0.1, 0.3, 1);
+
+  --font-ui: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --font-display: 'Cinzel Decorative', 'Libre Baskerville', serif;
+  --font-num: 'Libre Baskerville', Georgia, serif;
+  --display-variation: normal;
+  --display-tracking: 0.1em;
+  --display-weight: 700;
+  --label-caps: all-small-caps;
+
+  color-scheme: dark;
+}
+
+
+
+/* -------------------------------------------------- *
+ * Modern Warfare — CIC console, hairlines, no drama. *
+ * -------------------------------------------------- */
+:root[data-theme='warfare'] {
+  --hull: #05070a;
+  --hull-image:
+    radial-gradient(110% 70% at 50% -20%, #0a1116 0%, var(--hull) 60%),
+    repeating-linear-gradient(180deg, rgba(62, 224, 196, 0.03) 0 1px, transparent 1px 3px);
+  --panel: rgba(10, 17, 22, 0.85);
+  --panel-image: none;
+  --panel-radius: 0;
+
+  --water: #070d11;
+  --water-image:
+    radial-gradient(closest-side, transparent 62%, rgba(62, 224, 196, 0.12) 62.5%, transparent 63.5%),
+    radial-gradient(closest-side, transparent 36%, rgba(62, 224, 196, 0.1) 36.5%, transparent 37.5%),
+    linear-gradient(180deg, rgba(62, 224, 196, 0.05), transparent 70%);
+  --water-hover: rgba(62, 224, 196, 0.14);
+  --board-shadow:
+    inset 0 0 0 1px rgba(62, 224, 196, 0.18),
+    inset 0 0 40px rgba(62, 224, 196, 0.05);
+  --board-frame: 1px solid rgba(62, 224, 196, 0.35);
+
+  --line: rgba(62, 224, 196, 0.14);
+  --line-strong: rgba(62, 224, 196, 0.32);
+  --fog: #6d8a86;
+  --fog-dim: #3f524f;
+  --fog-bright: #3ee0c4;
+  --paper: #d8f2ec;
+
+  --accent: #3ee0c4;
+  --accent-hot: #62eed6;
+  --accent-ink: #04120f;
+
+  --hit: #ff3b3b;
+  --hit-dim: #a62222;
+  --hit-clip: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  --miss: #3ee0c4;
+  --miss-radius: 0;
+  --miss-fill: transparent;
+  --ship-a: #17262c;
+  --ship-b: #0e181d;
+  --ship-lost: #4a1414;
+  --ghost: rgba(62, 224, 196, 0.28);
+  --amber: #e6b84d;
+
+  --radius: 0;
+  --btn-radius: 0;
+  --btn-tracking: 0.2em;
+  --btn-transform: uppercase;
+  --dur: 110ms;
+  --dur-slow: 140ms;
+  --ease: cubic-bezier(0.3, 0, 0.2, 1);
+
+  --font-ui: 'Barlow Condensed', 'IBM Plex Sans', system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', 'IBM Plex Sans', sans-serif;
+  --font-num: 'Share Tech Mono', ui-monospace, monospace;
+  --display-variation: normal;
+  --display-tracking: 0.42em;
+  --display-weight: 600;
+  --label-caps: none;
+}
+
+/* --------------------------------------------------------------- *
+ * Pirates — aged chart on a table, lantern gold, original styling. *
+ * --------------------------------------------------------------- */
+:root[data-theme='pirates'] {
+  --hull: #120e0b;
+  --hull-image:
+    radial-gradient(115% 85% at 50% -10%, #241a12 0%, var(--hull) 62%),
+    radial-gradient(140% 120% at 50% 120%, rgba(31, 111, 104, 0.16), transparent 60%);
+  --panel: rgba(30, 22, 16, 0.82);
+  --panel-image: radial-gradient(120% 100% at 20% 0%, rgba(226, 182, 87, 0.07), transparent 60%);
+  --panel-radius: 4px;
+
+  --water: #1b1409;
+  --water-image:
+    radial-gradient(130% 110% at 25% 0%, rgba(226, 182, 87, 0.12), transparent 60%),
+    radial-gradient(120% 120% at 80% 100%, rgba(31, 111, 104, 0.18), transparent 65%),
+    repeating-linear-gradient(45deg, rgba(232, 217, 192, 0.02) 0 2px, transparent 2px 6px);
+  --water-hover: rgba(226, 182, 87, 0.16);
+  --board-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.65),
+    0 12px 36px rgba(0, 0, 0, 0.6);
+  --board-frame: 1px solid rgba(226, 182, 87, 0.4);
+
+  --line: rgba(232, 217, 192, 0.16);
+  --line-strong: rgba(226, 182, 87, 0.38);
+  --fog: #a4917a;
+  --fog-dim: #6a5c4a;
+  --fog-bright: #e2b657;
+  --paper: #e8d9c0;
+
+  --accent: #e2b657;
+  --accent-hot: #f0c86c;
+  --accent-ink: #1a1208;
+
+  --hit: #b42318;
+  --hit-dim: #7a1710;
+  --hit-clip: polygon(
+    18% 0,
+    50% 32%,
+    82% 0,
+    100% 18%,
+    68% 50%,
+    100% 82%,
+    82% 100%,
+    50% 68%,
+    18% 100%,
+    0 82%,
+    32% 50%,
+    0 18%
+  );
+  --miss: #7a8b7a;
+  --miss-radius: 50%;
+  --miss-fill: rgba(122, 139, 122, 0.22);
+  --ship-a: #2f4a46;
+  --ship-b: #1f2f2c;
+  --ship-lost: #5c1a12;
+  --ghost: rgba(31, 111, 104, 0.42);
+
+  --radius: 2px;
+  --btn-radius: 2px;
+  --btn-tracking: 0.12em;
+  --btn-transform: none;
+  --dur: 200ms;
+  --dur-slow: 240ms;
+  --ease: cubic-bezier(0.3, 0.6, 0.3, 1);
+
+  --font-ui: 'Libre Baskerville', Georgia, serif;
+  --font-display: 'Pirata One', 'Libre Baskerville', serif;
+  --font-num: 'Libre Baskerville', Georgia, serif;
+  --display-variation: normal;
+  --display-tracking: 0.14em;
+  --display-weight: 400;
+  --label-caps: none;
 }
 
 * {
@@ -37,9 +306,8 @@ body {
 }
 
 body {
-  background-image:
-    radial-gradient(120% 80% at 50% -10%, #0d1620 0%, var(--hull) 60%),
-    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 3px);
+  background-image: var(--hull-image);
+  font-family: var(--font-ui);
   font-size: 15px;
   line-height: 1.45;
   -webkit-tap-highlight-color: transparent;
@@ -86,20 +354,22 @@ input {
   min-height: 44px;
   padding: 0 18px;
   border: 1px solid var(--line-strong);
-  background: rgba(226, 232, 236, 0.04);
+  border-radius: var(--btn-radius);
+  background: color-mix(in srgb, var(--paper) 5%, transparent);
   color: var(--paper);
+  font-family: var(--font-ui);
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: var(--btn-tracking);
+  text-transform: var(--btn-transform);
   transition:
-    background-color 160ms var(--ease),
-    border-color 160ms var(--ease),
-    opacity 160ms var(--ease);
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
 }
 
 .btn:hover:not(:disabled) {
-  background: rgba(226, 232, 236, 0.1);
+  background: color-mix(in srgb, var(--paper) 12%, transparent);
   border-color: var(--fog);
 }
 
@@ -108,22 +378,36 @@ input {
 }
 
 .btn-primary {
-  background: var(--red);
-  border-color: var(--red);
-  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #e11733;
-  border-color: #e11733;
+  background: var(--accent-hot);
+  border-color: var(--accent-hot);
+}
+
+/* Engraved brass plate, not a flat fill. */
+:root[data-theme='olde'] .btn-primary {
+  background: linear-gradient(180deg, var(--accent-hot), var(--accent));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
 .wordmark {
-  font-family: 'Archivo Variable', 'IBM Plex Sans', sans-serif;
-  font-variation-settings: 'wdth' 82, 'wght' 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-variation-settings: var(--display-variation);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--display-tracking);
+  text-transform: var(--display-transform);
   line-height: 1;
+}
+
+:root[data-theme='olde'] .wordmark,
+:root[data-theme='pirates'] .wordmark {
+  text-transform: none;
 }
 
 .eyebrow {
@@ -134,6 +418,7 @@ input {
 }
 
 .mono-num {
+  font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
 }
 
@@ -149,11 +434,32 @@ input {
   border: 0;
 }
 
+/* Pirates: a little sway on the briefing wordmark only. Boards stay still. */
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-0.6deg);
+  }
+  50% {
+    transform: rotate(0.6deg);
+  }
+}
+
+:root[data-theme='pirates'] .sway {
+  animation: sway 6s ease-in-out infinite;
+  transform-origin: 50% 120%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  :root[data-theme='pirates'] .sway {
+    animation: none;
   }
 }

@@ -1,6 +1,9 @@
 .frame {
   --label: 16px;
   width: 100%;
+  padding: var(--chart-pad);
+  background: var(--chart-bg);
+  border-radius: var(--panel-radius);
   user-select: none;
   -webkit-user-select: none;
 }
@@ -9,9 +12,11 @@
   display: grid;
   grid-template-columns: var(--label) repeat(10, 1fr);
   gap: 0;
+  font-family: var(--font-num);
   font-size: 10px;
+  font-variant-caps: var(--label-caps);
   letter-spacing: 0.08em;
-  color: var(--fog);
+  color: var(--chart-ink-soft);
   text-align: center;
   padding-bottom: 3px;
 }
@@ -24,8 +29,9 @@
 .rows {
   display: grid;
   grid-template-rows: repeat(10, 1fr);
+  font-family: var(--font-num);
   font-size: 10px;
-  color: var(--fog);
+  color: var(--chart-ink-soft);
   align-items: center;
   justify-items: center;
 }
@@ -34,14 +40,10 @@
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   aspect-ratio: 1 / 1;
-  background: var(--water);
-  background-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.25)),
-    radial-gradient(140% 100% at 20% 0%, rgba(124, 154, 130, 0.06), transparent 60%);
-  border: 1px solid var(--line-strong);
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 10px 30px rgba(0, 0, 0, 0.45);
+  background-color: var(--water);
+  background-image: var(--water-image);
+  border: var(--board-frame);
+  box-shadow: var(--board-shadow);
   touch-action: manipulation;
 }
 
@@ -49,10 +51,10 @@
   position: relative;
   min-width: 0;
   padding: 0;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--chart-line);
+  border-bottom: 1px solid var(--chart-line);
   background: transparent;
-  transition: background-color 180ms var(--ease);
+  transition: background-color var(--dur) var(--ease);
 }
 
 .cell:nth-child(10n) {
@@ -64,7 +66,7 @@
 }
 
 button.cell:not([aria-disabled='true']):hover {
-  background: rgba(226, 232, 236, 0.09);
+  background: var(--water-hover);
 }
 
 button.cell[aria-disabled='true'] {
@@ -73,21 +75,16 @@ button.cell[aria-disabled='true'] {
 
 /* Own fleet */
 .ship {
-  background:
-    linear-gradient(180deg, #2b3946, #1d2833);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, var(--ship-a), var(--ship-b));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--paper) 10%, transparent);
 }
 
 .ship-hit {
-  background: linear-gradient(180deg, var(--red), var(--red-dim));
+  background: linear-gradient(180deg, var(--hit), var(--hit-dim));
 }
 
 .ship-sunk {
-  background: repeating-linear-gradient(
-    45deg,
-    var(--red-dim) 0 3px,
-    #46101c 3px 6px
-  );
+  background: repeating-linear-gradient(45deg, var(--hit-dim) 0 3px, var(--ship-lost) 3px 6px);
 }
 
 /* Firing grid */
@@ -98,53 +95,98 @@ button.cell[aria-disabled='true'] {
   content: '';
   position: absolute;
   inset: 22%;
-  animation: strike 200ms var(--ease);
+  animation: strike var(--dur-slow) var(--ease);
 }
 
 .miss::after {
-  border-radius: 50%;
-  background: transparent;
-  border: 1.5px solid var(--channel);
+  border-radius: var(--miss-radius);
+  background: var(--miss-fill);
+  border: 1.5px solid var(--miss);
   opacity: 0.75;
 }
 
 .hit::after {
-  background: var(--red);
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  background: var(--hit);
+  clip-path: var(--hit-clip);
 }
 
 .sunk {
-  background: rgba(200, 16, 46, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(200, 16, 46, 0.55);
+  background: color-mix(in srgb, var(--hit) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hit) 55%, transparent);
 }
 
 .sunk::after {
-  background: var(--red);
-  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  background: var(--hit);
+  clip-path: var(--hit-clip);
 }
 
 .reveal {
-  background: rgba(139, 151, 161, 0.16);
+  background: color-mix(in srgb, var(--chart-ink-soft) 16%, transparent);
 }
 
 .reveal::after {
   inset: 30%;
-  background: var(--fog);
+  background: var(--chart-ink-soft);
   opacity: 0.5;
   border-radius: 1px;
+  clip-path: none;
 }
 
 .ghost {
-  background: rgba(124, 154, 130, 0.35);
+  background: var(--ghost);
 }
 
 .ghost-bad {
-  background: rgba(200, 16, 46, 0.4);
-  animation: refuse 220ms var(--ease);
+  background: color-mix(in srgb, var(--hit) 40%, transparent);
+  animation: refuse var(--dur-slow) var(--ease);
 }
 
 .latest {
   box-shadow: inset 0 0 0 1.5px var(--fog-bright);
+}
+
+/* Modern Warfare: a hit is a hard square with a corner tick, not an explosion. */
+:global(:root[data-theme='warfare']) .hit::after,
+:global(:root[data-theme='warfare']) .sunk::after {
+  inset: 26%;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+:global(:root[data-theme='warfare']) .hit::before,
+:global(:root[data-theme='warfare']) .sunk::before {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border-top: 1px solid var(--hit);
+  border-right: 1px solid var(--hit);
+  width: 26%;
+  height: 26%;
+  left: auto;
+  bottom: auto;
+}
+
+:global(:root[data-theme='warfare']) .latest {
+  box-shadow: inset 0 0 0 1px var(--amber);
+}
+
+/* Pirates: selection is a compass ring, not a neon box. */
+:global(:root[data-theme='pirates']) .latest {
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    inset 0 0 8px color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 50%;
+}
+
+/* Ye Olde Times: hits land like a stamp on paper. */
+:global(:root[data-theme='olde']) .hit::after,
+:global(:root[data-theme='olde']) .sunk::after {
+  inset: 26%;
+  border-radius: 1px;
+  opacity: 0.88;
+}
+
+:global(:root[data-theme='olde']) .latest {
+  box-shadow: inset 0 0 0 1.5px var(--chart-ink);
 }
 
 @keyframes strike {

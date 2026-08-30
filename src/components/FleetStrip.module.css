@@ -1,6 +1,7 @@
 .strip {
   border: 1px solid var(--line);
-  background: rgba(16, 24, 32, 0.6);
+  background-color: var(--panel);
+  background-image: var(--panel-image);
   padding: 8px 10px 10px;
 }
 
@@ -47,7 +48,7 @@
 .pips i {
   width: 6px;
   height: 6px;
-  background: #33414e;
+  background: color-mix(in srgb, var(--paper) 22%, transparent);
   border-radius: 1px;
 }
 
@@ -63,13 +64,13 @@
 .down .name {
   color: var(--fog);
   text-decoration: line-through;
-  text-decoration-color: var(--red);
+  text-decoration-color: var(--hit);
 }
 
 .down .pips i {
-  background: var(--red-dim);
+  background: var(--hit-dim);
 }
 
 .down .state {
-  color: var(--red);
+  color: var(--hit);
 }
