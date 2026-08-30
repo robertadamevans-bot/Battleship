@@ -51,6 +51,8 @@ export default function Briefing({ settings, onDeploy }: BriefingProps) {
           <label className={styles.field}>
             <span className="eyebrow">Commander</span>
             <input
+              id="commander"
+              name="commander"
               value={name}
               maxLength={18}
               autoComplete="off"

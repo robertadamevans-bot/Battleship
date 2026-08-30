@@ -2,6 +2,7 @@ import Board from '../components/Board'
 import FleetStrip from '../components/FleetStrip'
 import { fireView, fleetView } from '../game/views'
 import { powderLeft, shotsFired, type Match } from '../game/match'
+import { gridBadge } from '../game/rules'
 import type { Cell } from '../game/types'
 import { resolutionLine } from '../theme/lines'
 import TheatreSwitch from '../theme/TheatreSwitch'
@@ -60,7 +61,7 @@ export default function Action({
 
       <div className={styles.meters}>
         <span className={`${styles.rank} mono-num`}>
-          Rank: {rules.rank} — {rules.humanGrid.rows}×{rules.humanGrid.cols}
+          Rank: {rules.rank} — {gridBadge(rules)}
           {powder === null ? '' : `, ${rules.matchShotBudgetHuman} shots`}
         </span>
         {powder !== null && (
