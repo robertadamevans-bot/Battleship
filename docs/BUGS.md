@@ -137,3 +137,20 @@ dependency that jsdom's CSS stack reaches through `require`.
 **Fix.** `@rolldown/binding-linux-x64-gnu` and `@oxlint/linux-x64-gnu` are now explicit dev
 dependencies, and the project is on Node 22. Noted in the README so the next person does not lose
 the same half hour.
+
+---
+
+## 9. Switching theatre mid-match left the previous theatre talking
+
+**Symptom.** With the theme pack in, firing three shots as Solent and then switching to Ye Olde
+Times left the signal log reading `F6 miss` and `North: D3 hit` above a banner that now said
+*Admiral North takes the range*. Half the screen was in the old voice.
+
+**Cause.** The match log stored finished sentences — `describe(result, by)` was called at the moment
+of the shot, so the wording was frozen with the theme that happened to be active. Nothing could
+re-word history.
+
+**Fix.** `Match.log` is now `{ result, by }[]` — data, not prose — and a presentation-layer
+`resolutionLine(entry, copy)` renders it with whatever theatre is current. Switching theatre now
+re-words every past shot, and the engine no longer knows any English at all. The match test
+asserts on `log[0].result.outcome` instead of a regex over a sentence.

@@ -49,6 +49,20 @@ a phone, the layout is safe-area aware, and it is checked for horizontal overflo
 440 px. Cells are buttons: arrow keys move the aim, Enter or Space fires, focus survives the turn
 change.
 
+## Theatres
+
+Four visual themes — Solent (original), Ye Olde Times, Modern Warfare, Pirates of the Caribbean —
+picked on the briefing screen and switchable mid-match from the header. A theatre is one
+`data-theme` attribute on `<html>` plus the CSS custom properties in `src/styles/global.css`; there
+is no per-theme route, component or board, and no hex values live in the components. Tone shifts
+through `themeCopy` in `src/theme/themes.ts` (button labels, turn banners, resolution lines, ship
+aliases on the tray), while ship IDs, lengths, coordinates, delays, the AI and win detection are
+untouched. The choice and the commander's name persist in localStorage; every theatre respects
+`prefers-reduced-motion`.
+
+Shots are logged structurally (`{ result, by }`) rather than as sentences, so switching theatre
+mid-match re-words the existing signal log instead of leaving English from the previous skin.
+
 ## Running it
 
 ```bash
@@ -68,6 +82,7 @@ src/game      board geometry, placement rules, shot resolver, match state — no
 src/ai        Admiral North
 src/components Board, FleetStrip
 src/screens   Briefing, Deployment, Action, AfterAction
+src/theme     theatre tokens, copy map, provider, localStorage
 ```
 
 Game logic is deliberately free of React so it can be unit-tested and, if it ever mattered, run
