@@ -1,11 +1,19 @@
 import { EMPTY_MEMORY, rememberShot, type AiMemory, type Difficulty } from '../ai/admiral'
-import { label } from './geometry'
 import { randomFleet } from './placement'
 import { canFire, isFleetDestroyed, resolveShot, shotCount } from './resolve'
-import { shipSpec, type Cell, type Placement, type ShotResult, type Side } from './types'
+import type { Cell, Placement, ShotResult, Side } from './types'
 import type { Rng } from './rng'
 
 export type Commander = 'human' | 'ai'
+
+/**
+ * The log keeps results rather than sentences, so the wording can follow the
+ * theme even if the commander switches theatre mid-match.
+ */
+export interface LogEntry {
+  result: ShotResult
+  by: Commander
+}
 
 export interface Match {
   /** The human's water. Admiral North fires here. */
@@ -15,7 +23,7 @@ export interface Match {
   turn: Commander
   memory: AiMemory
   difficulty: Difficulty
-  log: string[]
+  log: LogEntry[]
   winner: Commander | null
 }
 
@@ -35,18 +43,6 @@ export function startMatch(
   }
 }
 
-/** Plain-English resolution line, e.g. "C2 — you sank the Submarine". */
-export function describe(result: ShotResult, by: Commander): string {
-  const where = label(result.cell)
-  const name = result.shipId ? shipSpec(result.shipId).name : ''
-  if (by === 'human') {
-    if (result.outcome === 'sunk') return `${where} — you sank the ${name}`
-    return `${where} ${result.outcome}`
-  }
-  if (result.outcome === 'sunk') return `${where} — your ${name} is gone`
-  return `North: ${where} ${result.outcome}`
-}
-
 export interface Turn {
   match: Match
   result: ShotResult
@@ -64,7 +60,7 @@ export function humanFires(match: Match, cell: Cell): Turn | null {
       enemy: side,
       turn: won ? 'human' : 'ai',
       winner: won ? 'human' : null,
-      log: [describe(result, 'human'), ...match.log].slice(0, 40),
+      log: [{ result, by: 'human' as const }, ...match.log].slice(0, 40),
     },
   }
 }
@@ -82,7 +78,7 @@ export function aiFires(match: Match, cell: Cell): Turn | null {
       memory: rememberShot(match.memory, result),
       turn: won ? 'ai' : 'human',
       winner: won ? 'ai' : null,
-      log: [describe(result, 'ai'), ...match.log].slice(0, 40),
+      log: [{ result, by: 'ai' as const }, ...match.log].slice(0, 40),
     },
   }
 }

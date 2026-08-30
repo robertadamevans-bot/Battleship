@@ -64,6 +64,7 @@ describe('turn structure', () => {
       }
     }
     expect(state.winner).not.toBeNull()
-    expect(state.log[0]).toMatch(/miss|hit|sank|gone/)
+    expect(state.log[0].result.outcome).toMatch(/miss|hit|sunk/)
+    expect(state.log[0].by).toMatch(/human|ai/)
   })
 })
