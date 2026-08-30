@@ -1,0 +1,148 @@
+.screen {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.back {
+  min-height: 44px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fog);
+}
+
+.back:hover {
+  color: var(--paper);
+}
+
+.rules {
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--fog);
+  padding: 8px 0 12px;
+}
+
+.layout {
+  display: grid;
+  gap: 16px;
+}
+
+.side {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.tray {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.trayItem {
+  width: 100%;
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: rgba(16, 24, 32, 0.55);
+  text-align: left;
+}
+
+.trayItem:hover {
+  border-color: var(--fog);
+}
+
+.trayItem.active {
+  border-color: var(--red);
+  background: rgba(200, 16, 46, 0.12);
+}
+
+.trayItem.done .shipName {
+  color: var(--fog);
+}
+
+.shipName {
+  font-size: 14px;
+  color: var(--paper);
+}
+
+.marks {
+  display: flex;
+  gap: 3px;
+}
+
+.marks i {
+  width: 8px;
+  height: 8px;
+  background: #33414e;
+  border-radius: 1px;
+}
+
+.active .marks i {
+  background: var(--red);
+}
+
+.done .marks i {
+  background: var(--channel);
+}
+
+.status {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fog);
+  min-width: 26px;
+  text-align: right;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.controls .btn {
+  padding: 0 6px;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+
+.hint {
+  font-size: 12.5px;
+  color: var(--fog-bright);
+  min-height: 36px;
+  border-left: 2px solid var(--red);
+  padding-left: 10px;
+}
+
+.engage {
+  width: 100%;
+}
+
+@media (min-width: 760px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 26px;
+    align-items: start;
+  }
+}
