@@ -1,0 +1,29 @@
+.wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.select {
+  min-height: 32px;
+  max-width: 128px;
+  padding: 0 6px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--fog);
+  background: color-mix(in srgb, var(--paper) 5%, transparent);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--btn-radius);
+  appearance: none;
+  text-align: center;
+  text-overflow: ellipsis;
+}
+
+.select:hover {
+  color: var(--paper);
+  border-color: var(--fog);
+}
+
+.select option {
+  color: initial;
+}
