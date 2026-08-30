@@ -1,13 +1,14 @@
 # Handoff
 
-Solent is a single-match Battleship game — four screens (briefing, deployment, action, after-action), no accounts, no backend, nothing persisted between matches.
-Rules live in `src/game` as pure functions: geometry, placement legality, the shot resolver both sides share, and match/turn state; React never owns a rule.
-Admiral North is `src/ai/admiral.ts` — parity hunt, occupancy heatmap, orthogonal probe, axis lock, sunk-cell cleanup — and it sees only its own shot history, so it cannot cheat.
-Intact enemy ships are absent from the fire board's view model entirely rather than hidden with CSS, which is why nothing leaks into the DOM before the reveal.
-Input during North's turn is refused, not unmounted; that distinction is bug #1 in `docs/BUGS.md` and is the thing a refactor is most likely to break.
-Four visual theatres are a presentation layer only: one `data-theme` attribute plus the tokens in `src/styles/global.css`, and the `themeCopy` map in `src/theme/themes.ts` — the engine holds no colours and no English.
-`npm test` (Vitest, 48 tests) covers the rules, the AI, and the two interactive screens; `npm run lint` is oxlint; `npm run build` runs `tsc -b` first, which is what catches config drift.
-Node 22 is required — Vitest's dependency graph does not load under Node 20, and two native bindings are pinned as explicit dev dependencies for the same class of reason.
-Mobile is the primary target: boards stack, layout is safe-area aware, and it is checked for horizontal overflow at 320, 390 and 440 px.
-Known gaps: no persistence, no undo, three synthesised sound cues rather than real assets, and the heatmap is recomputed on every AI shot.
-Next moves worth making: a scrolling shot log on the action screen, and difficulty tuning driven by Admiral's average shots-to-win in self-play.
+Armada (working title: Solent) is a single-match Battleship game against Admiral North — four screens, no accounts, no backend, nothing persisted between matches.
+Live at <https://dist-dafkqrcs.devinapps.com>, source at <https://github.com/robertadamevans-bot/Battleship>.
+Five ranks — Cadet, Officer, Commander, Admiral, Fleet Legend — are chosen on the briefing screen and are rule packs, not labels: `src/game/rules.ts` holds one `Ruleset` each and `startMatch` loads it, so grids, fleets, the spacing rule, the 42-shot Commander budget, the 12s and 8s clocks, fog aging, Legend's decoys and moving destroyer, and one-life all come from data. Officer is the default and is the classic game.
+The engine is pure and React-free: geometry, placement legality, the single shot resolver both sides share, and match/turn state. Boards are rectangular and sized from the ruleset; there is no `BOARD = 10` and no `FLEET` constant left to find.
+Admiral North is `src/ai/admiral.ts` — parity hunt, occupancy heatmap, orthogonal probe, axis lock, sunk-cell attribution — behind five profiles selected by rank. It sees only its own shot history, so it cannot cheat; `npm run sim` benches it and `docs/AI.md` records the numbers.
+Two different kinds of hidden information share the fire board and are easy to confuse: intact enemy ships are absent from the view model entirely, while Admiral/Legend fog fades *your own* old misses to `uncertain`. Fog is presentation only — the cell is still spent, which is defect #10 in `docs/BUGS.md`.
+Input during North's turn is refused, not unmounted, and the clock lives in `Match.turnStartedAt` rather than a React ref. Timeouts spend one legal shot through the same `humanFires` path as a tap; nothing else may fire while the resolution beat is playing (defect #12).
+Four visual theatres are presentation only: one `data-theme` attribute plus tokens in `src/styles/global.css`, and the `themeCopy` map in `src/theme/themes.ts`, which now also words powder, clock, fog, ghost contacts and one-life. Switching theatre mid-match keeps boards, ships, turn and rank.
+`npm test` (Vitest, 98 tests) covers the five rulesets, every rank rule the brief specifies, the AI profiles and the interactive screens; `npm run lint` is oxlint; `npm run build` runs `tsc -b` first, which is what catches config drift. Node 22 is required.
+Storage is three keys: `armada.theme`, `armada.commanderName`, `armada.difficulty`, with a one-time read of the old `solent.*` names. In-flight matches are deliberately not persisted, so a reload cannot resurrect expired time or uncleared fog.
+Known compromises: Cadet's 12×12 board lands at roughly 28px cells on a 390px phone — the brief prefers no page-scroll over a 36px cell, so that is the trade taken; three synthesised sound cues rather than real assets; the heatmap is recomputed on every AI shot.
+Next moves worth making: a scrolling shot log on the action screen, per-rank win-rate telemetry against the bench in `scripts/simulate.ts`, and a sixth rank is now a data change rather than a code change.
