@@ -6,7 +6,7 @@ Battleship in the water between Southampton and the Isle of Wight. Ten by ten, f
 one match against Admiral North — a search algorithm that hunts on parity, weighs an occupancy
 heatmap, and finishes what it starts.
 
-- Live: _see the repository description_
+- Live: <https://dist-dafkqrcs.devinapps.com>
 - Bugs found and fixed while building it: [docs/BUGS.md](docs/BUGS.md)
 - Handover notes: [HANDOFF.md](HANDOFF.md)
 
