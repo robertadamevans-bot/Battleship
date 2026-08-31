@@ -1,10 +1,12 @@
 import { useCallback, useRef, useState } from 'react'
-import { BOARD_SIZE, COLUMNS, key, label } from '../game/geometry'
-import type { Cell } from '../game/types'
+import { columnLabels, key, label, rowLabels } from '../game/geometry'
+import type { Cell, Grid } from '../game/types'
 import type { CellView } from '../game/views'
 import styles from './Board.module.css'
 
 interface BoardProps {
+  /** The water this board covers: cells, headers and aspect all follow it. */
+  grid: Grid
   /** Visual state per cell key; anything absent is open water. */
   views: Map<string, CellView>
   /** When false the grid is presentational — no buttons, no focus, no pointer. */
@@ -35,9 +37,15 @@ const DESCRIPTION: Record<CellView, string> = {
   ghost: 'placement preview',
   'ghost-bad': 'illegal placement',
   reveal: 'enemy ship',
+  uncertain: 'spent, uncharted',
+  range: 'possible bearing',
 }
 
+/** Views that mean the cell has been fired at, whatever the chart now shows. */
+const SPENT: CellView[] = ['miss', 'hit', 'sunk', 'uncertain']
+
 export default function Board({
+  grid,
   views,
   interactive,
   locked = false,
@@ -68,26 +76,28 @@ export default function Board({
     if (!next) return
     event.preventDefault()
     focusCell({
-      row: Math.max(0, Math.min(BOARD_SIZE - 1, next.row)),
-      col: Math.max(0, Math.min(BOARD_SIZE - 1, next.col)),
+      row: Math.max(0, Math.min(grid.rows - 1, next.row)),
+      col: Math.max(0, Math.min(grid.cols - 1, next.col)),
     })
   }
 
-  const rows = Array.from({ length: BOARD_SIZE }, (_, row) => row)
+  const columns = columnLabels(grid)
+  const rows = rowLabels(grid)
+  const shape = { '--cols': grid.cols, '--rows': grid.rows } as React.CSSProperties
 
   return (
-    <div className={styles.frame} onPointerLeave={() => onAim?.(null)}>
+    <div className={styles.frame} style={shape} onPointerLeave={() => onAim?.(null)}>
       <div className={styles.columns} aria-hidden="true">
         <span />
-        {COLUMNS.map((c) => (
+        {columns.map((c) => (
           <span key={c}>{c}</span>
         ))}
       </div>
       <div className={styles.body}>
         <div className={styles.rows} aria-hidden="true">
-          {rows.map((row) => (
-            <span key={row} className="mono-num">
-              {row + 1}
+          {rows.map((r) => (
+            <span key={r} className="mono-num">
+              {r}
             </span>
           ))}
         </div>
@@ -96,8 +106,8 @@ export default function Board({
           role={interactive ? 'grid' : 'presentation'}
           aria-label={interactive ? name : undefined}
         >
-          {rows.map((row) =>
-            COLUMNS.map((_, col) => {
+          {rows.map((_r, row) =>
+            columns.map((_c, col) => {
               const cell = { row, col }
               const k = key(cell)
               const view = views.get(k) ?? 'water'
@@ -113,8 +123,7 @@ export default function Board({
               if (!interactive) {
                 return <div key={k} className={className} />
               }
-              const resolved = view === 'miss' || view === 'hit' || view === 'sunk'
-              const blocked = locked || resolved
+              const blocked = locked || SPENT.includes(view)
               return (
                 <button
                   key={k}

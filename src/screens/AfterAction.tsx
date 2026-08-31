@@ -1,7 +1,6 @@
 import Board from '../components/Board'
 import FleetStrip from '../components/FleetStrip'
-import { shotsFired, type Match } from '../game/match'
-import { FLEET } from '../game/types'
+import { powderLeft, shotsFired, type Match } from '../game/match'
 import { fireView } from '../game/views'
 import { useTheme } from '../theme/useTheme'
 import styles from './AfterAction.module.css'
@@ -20,12 +19,35 @@ export default function AfterAction({
   onNewBriefing,
 }: AfterActionProps) {
   const { copy } = useTheme()
+  const rules = match.rules
   const shots = shotsFired(match)
   const humanWon = match.winner === 'human'
+  const real = rules.fleet.filter((s) => !s.decoy)
   const survivors = {
-    human: FLEET.length - match.fleet.sunk.length,
-    ai: FLEET.length - match.enemy.sunk.length,
+    human: real.length - match.fleet.sunk.length,
+    ai: real.length - match.enemy.sunk.filter((id) => real.some((s) => s.id === id)).length,
   }
+  const powder = powderLeft(match)
+
+  /** One true sentence about how this particular rank ended. */
+  const verdict = (() => {
+    switch (match.ending) {
+      case 'powder-spent':
+        return copy.powderSpent
+      case 'one-life':
+        return copy.oneLifeLoss(
+          copy.shipAlias[match.fleet.sunk[0] ?? 'destroyer'],
+        )
+      default:
+        return humanWon
+          ? `North's fleet is on the bottom. You had ${survivors.human} ship${
+              survivors.human === 1 ? '' : 's'
+            } still afloat.`
+          : `Your fleet is on the bottom. North still had ${survivors.ai} ship${
+              survivors.ai === 1 ? '' : 's'
+            } afloat.`
+    }
+  })()
 
   return (
     <main className={styles.screen}>
@@ -34,18 +56,14 @@ export default function AfterAction({
         <h1 className={`wordmark ${styles.verdict} ${humanWon ? styles.win : styles.loss}`}>
           {humanWon ? `${commander} ${copy.youWin}` : copy.youLose}
         </h1>
-        <p className={styles.line}>
-          {humanWon
-            ? `North's fleet is on the bottom. You had ${survivors.human} ship${
-                survivors.human === 1 ? '' : 's'
-              } still afloat.`
-            : `Your fleet is on the bottom. North still had ${survivors.ai} ship${
-                survivors.ai === 1 ? '' : 's'
-              } afloat.`}
-        </p>
+        <p className={styles.line}>{verdict}</p>
       </header>
 
       <dl className={styles.stats}>
+        <div>
+          <dt className="eyebrow">Rank</dt>
+          <dd>{rules.rank}</dd>
+        </div>
         <div>
           <dt className="eyebrow">{commander} shots</dt>
           <dd className="mono-num">{shots.human}</dd>
@@ -54,6 +72,12 @@ export default function AfterAction({
           <dt className="eyebrow">North shots</dt>
           <dd className="mono-num">{shots.ai}</dd>
         </div>
+        {powder !== null && (
+          <div>
+            <dt className="eyebrow">{copy.powderLabel} left</dt>
+            <dd className="mono-num">{powder}</dd>
+          </div>
+        )}
         <div>
           <dt className="eyebrow">Your ships left</dt>
           <dd className="mono-num">{survivors.human}</dd>
@@ -69,10 +93,15 @@ export default function AfterAction({
           <span className="eyebrow">Reveal</span>
           {copy.aiName}
         </h2>
-        <Board name="Admiral North's revealed fleet" views={fireView(match.enemy, true)} interactive={false} />
+        <Board
+          name="Admiral North's revealed fleet"
+          grid={match.enemy.grid}
+          views={fireView(match.enemy, { reveal: true })}
+          interactive={false}
+        />
         <div className={styles.strips}>
-          <FleetStrip title="North's fleet" sunk={match.enemy.sunk} />
-          <FleetStrip title="Your fleet" sunk={match.fleet.sunk} />
+          <FleetStrip title="North's fleet" fleet={rules.fleet} sunk={match.enemy.sunk} />
+          <FleetStrip title="Your fleet" fleet={rules.fleet} sunk={match.fleet.sunk} />
         </div>
       </section>
 

@@ -1,7 +1,8 @@
 import Board from '../components/Board'
 import FleetStrip from '../components/FleetStrip'
 import { fireView, fleetView } from '../game/views'
-import { shotsFired, type Match } from '../game/match'
+import { powderLeft, shotsFired, type Match } from '../game/match'
+import { gridBadge } from '../game/rules'
 import type { Cell } from '../game/types'
 import { resolutionLine } from '../theme/lines'
 import TheatreSwitch from '../theme/TheatreSwitch'
@@ -15,6 +16,8 @@ interface ActionProps {
   locked: boolean
   lastHumanShot: Cell | null
   lastAiShot: Cell | null
+  /** Milliseconds left on the human's clock; null on ranks without one. */
+  msLeft: number | null
   onFire: (cell: Cell) => void
 }
 
@@ -24,17 +27,22 @@ export default function Action({
   locked,
   lastHumanShot,
   lastAiShot,
+  msLeft,
   onFire,
 }: ActionProps) {
   const { copy } = useTheme()
+  const rules = match.rules
   const shots = shotsFired(match)
   const banner = match.turn === 'ai' ? copy.theirTurn : copy.yourTurn(commander)
   const latest = match.log[0]
+  const powder = powderLeft(match)
+  // Fog ranks keep the log short: the chart is meant to be unreliable.
+  const logLimit = rules.fog.enabled ? 3 : 12
 
   return (
     <main className={styles.screen}>
       <header className={styles.head}>
-        <span className={`wordmark ${styles.mark}`}>Solent</span>
+        <span className={`wordmark ${styles.mark}`}>Armada</span>
         <span className={`${styles.shots} mono-num`}>
           {commander} {shots.human} · North {shots.ai}
         </span>
@@ -51,6 +59,32 @@ export default function Action({
         </p>
       </div>
 
+      <div className={styles.meters}>
+        <span className={`${styles.rank} mono-num`}>
+          Rank: {rules.rank} — {gridBadge(rules)}
+          {powder === null ? '' : `, ${rules.matchShotBudgetHuman} shots`}
+        </span>
+        {powder !== null && (
+          <span
+            className={`${styles.meter} ${powder <= 5 ? styles.low : ''} mono-num`}
+            role="status"
+          >
+            {copy.powderLabel} {powder}
+          </span>
+        )}
+        {msLeft !== null && (
+          <span
+            className={`${styles.meter} ${msLeft <= 3000 ? styles.low : ''} mono-num`}
+            role="timer"
+            aria-label={`${copy.clockLabel} ${Math.ceil(msLeft / 1000)} seconds`}
+          >
+            {copy.clockLabel} {(msLeft / 1000).toFixed(1)}s
+          </span>
+        )}
+      </div>
+
+      {rules.oneLife && <p className={styles.oneLife}>{copy.oneLifeBanner}</p>}
+
       <div className={styles.boards}>
         <section className={styles.primary}>
           <h2 className={styles.boardTitle}>
@@ -59,13 +93,17 @@ export default function Action({
           </h2>
           <Board
             name="Admiral North's water — choose a target"
-            views={fireView(match.enemy, false)}
+            grid={match.enemy.grid}
+            views={fireView(match.enemy, {
+              fog: rules.fog,
+              adjacentHitIndicators: rules.hints.adjacentHitIndicators,
+            })}
             interactive={!match.winner}
             locked={locked}
             lastShot={lastHumanShot}
             onFire={onFire}
           />
-          <FleetStrip title="North's fleet" sunk={match.enemy.sunk} />
+          <FleetStrip title="North's fleet" fleet={rules.fleet} sunk={match.enemy.sunk} />
         </section>
 
         <section className={styles.secondary}>
@@ -75,11 +113,12 @@ export default function Action({
           </h2>
           <Board
             name={`${commander}'s water`}
+            grid={match.fleet.grid}
             views={fleetView(match.fleet)}
             interactive={false}
             lastShot={lastAiShot}
           />
-          <FleetStrip title="Your fleet" sunk={match.fleet.sunk} />
+          <FleetStrip title="Your fleet" fleet={rules.fleet} sunk={match.fleet.sunk} />
         </section>
       </div>
 
@@ -87,7 +126,7 @@ export default function Action({
         <details className={styles.logWrap}>
           <summary className="eyebrow">Signal log</summary>
           <ol className={styles.log}>
-            {match.log.slice(0, 12).map((entry, i) => (
+            {match.log.slice(0, logLimit).map((entry, i) => (
               <li key={`${entry.result.cell.row}-${entry.result.cell.col}-${entry.by}-${i}`}>
                 {resolutionLine(entry, copy)}
               </li>

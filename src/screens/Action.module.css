@@ -132,3 +132,48 @@
     align-items: start;
   }
 }
+
+/* Rank furniture: shot budget, clock and the one-life warning. */
+.meters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+}
+
+.rank {
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fog);
+  margin-right: auto;
+}
+
+.meter {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: var(--paper);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--btn-radius);
+  font-variant-numeric: tabular-nums;
+}
+
+.meter.low {
+  color: var(--hit);
+  border-color: var(--hit);
+  background: color-mix(in srgb, var(--hit) 12%, transparent);
+}
+
+.oneLife {
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--hit);
+  border-left: 2px solid var(--hit);
+  padding: 4px 0 4px 8px;
+  margin-bottom: 10px;
+}

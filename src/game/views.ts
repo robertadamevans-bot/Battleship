@@ -1,4 +1,6 @@
-import { key, shipCells } from './geometry'
+import { fromKey, key, neighbours, shipCells } from './geometry'
+import { shotCount } from './resolve'
+import type { FogConfig } from './rules'
 import type { Side } from './types'
 
 export type CellView =
@@ -12,14 +14,26 @@ export type CellView =
   | 'ghost'
   | 'ghost-bad'
   | 'reveal'
+  /** A spent miss the chart has forgotten. Still spent, no longer marked. */
+  | 'uncertain'
+  /** Cadet-only range pip beside an unsunk hit. A hint, not a shot. */
+  | 'range'
+
+export interface FireViewOptions {
+  reveal?: boolean
+  fog?: FogConfig
+  adjacentHitIndicators?: boolean
+}
 
 /**
  * What the human may see of Admiral North's water: their own shots, plus the
  * outline of ships already sunk. Intact enemy ships are not in the returned map
  * at all, so they cannot leak into the DOM before the reveal.
  */
-export function fireView(enemy: Side, reveal: boolean): Map<string, CellView> {
+export function fireView(enemy: Side, options: FireViewOptions = {}): Map<string, CellView> {
+  const { reveal = false, fog, adjacentHitIndicators = false } = options
   const views = new Map<string, CellView>()
+
   if (reveal) {
     for (const placement of enemy.placements) {
       for (const cell of shipCells(placement)) views.set(key(cell), 'reveal')
@@ -29,10 +43,27 @@ export function fireView(enemy: Side, reveal: boolean): Map<string, CellView> {
     if (!enemy.sunk.includes(placement.id)) continue
     for (const cell of shipCells(placement)) views.set(key(cell), 'sunk')
   }
+
+  const fired = shotCount(enemy)
   for (const [k, outcome] of Object.entries(enemy.shots)) {
     if (views.get(k) === 'sunk') continue
+    if (outcome === 'miss' && !reveal && fog?.enabled) {
+      const age = fired - (enemy.order[k] ?? fired)
+      views.set(k, age > fog.fadeAfterRounds ? 'uncertain' : 'miss')
+      continue
+    }
     views.set(k, outcome)
   }
+
+  if (adjacentHitIndicators && !reveal) {
+    for (const [k, outcome] of Object.entries(enemy.shots)) {
+      if (outcome !== 'hit' || views.get(k) === 'sunk') continue
+      for (const n of neighbours(fromKey(k), enemy.grid)) {
+        if (!views.has(key(n))) views.set(key(n), 'range')
+      }
+    }
+  }
+
   return views
 }
 

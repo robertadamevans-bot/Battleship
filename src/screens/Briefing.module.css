@@ -60,28 +60,64 @@
   color: var(--fog-dim);
 }
 
-.segments {
+/* Rank picker: five cards, one column so the stakes line stays readable. */
+.ranks {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--line-strong);
+  gap: 6px;
 }
 
-.segment {
-  min-height: 44px;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.rank {
+  display: grid;
+  gap: 3px;
+  min-height: 52px;
+  padding: 8px 10px;
+  text-align: left;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--btn-radius);
+  background: color-mix(in srgb, var(--paper) 4%, transparent);
+  transition:
+    border-color var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+
+.rank.on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.rankHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rankName {
+  font-size: 13px;
+  color: var(--paper);
+}
+
+.badge {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--fog);
+  white-space: nowrap;
+}
+
+.rank.on .badge {
+  color: var(--paper);
+}
+
+.rankStakes,
+.rankCaution {
+  font-size: 11px;
+  line-height: 1.35;
   color: var(--fog);
 }
 
-.segment + .segment {
-  border-left: 1px solid var(--line-strong);
-}
-
-.segment.on {
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--paper);
-  box-shadow: inset 0 -2px 0 var(--accent);
+.rankCaution {
+  color: var(--fog-dim);
 }
 
 .note {

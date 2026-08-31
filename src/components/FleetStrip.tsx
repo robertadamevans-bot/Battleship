@@ -1,25 +1,28 @@
-import { FLEET, type ShipId } from '../game/types'
+import type { ShipId, ShipSpec } from '../game/types'
 import { useTheme } from '../theme/useTheme'
 import styles from './FleetStrip.module.css'
 
 interface FleetStripProps {
   title: string
+  /** The ships this rank actually fields. Decoys are never listed. */
+  fleet: readonly ShipSpec[]
   sunk: readonly ShipId[]
 }
 
-export default function FleetStrip({ title, sunk }: FleetStripProps) {
+export default function FleetStrip({ title, fleet, sunk }: FleetStripProps) {
   const { copy } = useTheme()
-  const lost = sunk.length
+  const real = fleet.filter((s) => !s.decoy)
+  const lost = real.filter((s) => sunk.includes(s.id)).length
   return (
     <section className={styles.strip}>
       <header>
         <span className="eyebrow">{title}</span>
         <span className={`${styles.count} mono-num`}>
-          {FLEET.length - lost}/{FLEET.length}
+          {real.length - lost}/{real.length}
         </span>
       </header>
       <ul>
-        {FLEET.map((ship) => {
+        {real.map((ship) => {
           const down = sunk.includes(ship.id)
           return (
             <li key={ship.id} className={down ? styles.down : undefined}>

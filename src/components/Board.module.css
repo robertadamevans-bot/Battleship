@@ -10,7 +10,7 @@
 
 .columns {
   display: grid;
-  grid-template-columns: var(--label) repeat(10, 1fr);
+  grid-template-columns: var(--label) repeat(var(--cols, 10), minmax(0, 1fr));
   gap: 0;
   font-family: var(--font-num);
   font-size: 10px;
@@ -23,12 +23,12 @@
 
 .body {
   display: grid;
-  grid-template-columns: var(--label) 1fr;
+  grid-template-columns: var(--label) minmax(0, 1fr);
 }
 
 .rows {
   display: grid;
-  grid-template-rows: repeat(10, 1fr);
+  grid-template-rows: repeat(var(--rows, 10), 1fr);
   font-family: var(--font-num);
   font-size: 10px;
   color: var(--chart-ink-soft);
@@ -38,8 +38,11 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
-  aspect-ratio: 1 / 1;
+  min-width: 0;
+  grid-template-columns: repeat(var(--cols, 10), minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  aspect-ratio: var(--cols, 10) / var(--rows, 10);
+  overflow: hidden;
   background-color: var(--water);
   background-image: var(--water-image);
   border: var(--board-frame);
@@ -57,13 +60,6 @@
   transition: background-color var(--dur) var(--ease);
 }
 
-.cell:nth-child(10n) {
-  border-right: none;
-}
-
-.cell:nth-child(n + 91) {
-  border-bottom: none;
-}
 
 button.cell:not([aria-disabled='true']):hover {
   background: var(--water-hover);
@@ -143,6 +139,30 @@ button.cell[aria-disabled='true'] {
 
 .latest {
   box-shadow: inset 0 0 0 1.5px var(--fog-bright);
+}
+
+/* Fog: the shot is spent, but the chart no longer says where it fell. */
+.uncertain {
+  background: color-mix(in srgb, var(--chart-ink-soft) 10%, transparent);
+}
+
+.uncertain::after {
+  content: '';
+  position: absolute;
+  inset: 38%;
+  border-radius: 50%;
+  background: var(--chart-ink-soft);
+  opacity: 0.28;
+}
+
+/* Cadet range pip: a hint beside a wounded ship, never a shot. */
+.range::after {
+  content: '';
+  position: absolute;
+  inset: 44%;
+  border-radius: 50%;
+  background: var(--fog-bright);
+  opacity: 0.45;
 }
 
 /* Modern Warfare: a hit is a hard square with a corner tick, not an explosion. */

@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import type { Difficulty } from '../ai/admiral'
+import { gridBadge, RULESETS, ruleset, type DifficultyId } from '../game/rules'
 import { useTheme } from '../theme/useTheme'
 import { THEME_SPECS } from '../theme/themes'
 import styles from './Briefing.module.css'
 
 export interface Settings {
   name: string
-  difficulty: Difficulty
+  difficulty: DifficultyId
   sound: boolean
 }
 
@@ -15,33 +15,30 @@ interface BriefingProps {
   onDeploy: (settings: Settings) => void
 }
 
-const DIFFICULTIES: { id: Difficulty; label: string; note: string }[] = [
-  { id: 'admiral', label: 'Admiral', note: 'Parity search, occupancy heatmap, relentless follow-up.' },
-  { id: 'cadet', label: 'Cadet', note: 'Hunt and target, but fires without reading the water.' },
-]
-
 /** Nine cells of the theatre's palette: water, water, hit, miss and so on. */
 const MINI: readonly number[] = [0, 0, 1, 0, 2, 0, 0, 0, 1]
 
 export default function Briefing({ settings, onDeploy }: BriefingProps) {
   const { theme, setTheme, copy } = useTheme()
   const [name, setName] = useState(settings.name)
-  const [difficulty, setDifficulty] = useState<Difficulty>(settings.difficulty)
+  const [difficulty, setDifficulty] = useState<DifficultyId>(settings.difficulty)
   const [sound, setSound] = useState(settings.sound)
 
   const commander = name.trim() === '' ? 'Rob' : name.trim()
+  const rules = ruleset(difficulty)
 
   return (
     <main className={styles.screen}>
       <div className={styles.card}>
         <header className={styles.head}>
-          <h1 className={`wordmark sway ${styles.mark}`}>Solent</h1>
+          <h1 className={`wordmark sway ${styles.mark}`}>ARMADA</h1>
           <p className={styles.tagline}>Fleet action. Human vs machine.</p>
         </header>
 
         <p className={styles.blurb}>
-          Ten by ten of cold water between Southampton and the Isle of Wight. Five ships each.
-          Admiral North hunts by parity and probability, so place carefully and fire first.
+          Cold water, two fleets and one turn each. Admiral North hunts by parity and
+          probability, so place carefully and fire first. Your rank sets the rules, not just
+          North&rsquo;s aim.
         </p>
 
         <form
@@ -54,6 +51,8 @@ export default function Briefing({ settings, onDeploy }: BriefingProps) {
           <label className={styles.field}>
             <span className="eyebrow">Commander</span>
             <input
+              id="commander"
+              name="commander"
               value={name}
               maxLength={18}
               autoComplete="off"
@@ -89,23 +88,27 @@ export default function Briefing({ settings, onDeploy }: BriefingProps) {
           </fieldset>
 
           <fieldset className={styles.field}>
-            <legend className="eyebrow">Opponent</legend>
-            <div className={styles.segments}>
-              {DIFFICULTIES.map((option) => (
+            <legend className="eyebrow">Rank</legend>
+            <div className={styles.ranks}>
+              {RULESETS.map((rank) => (
                 <button
-                  key={option.id}
+                  key={rank.id}
                   type="button"
-                  className={`${styles.segment} ${difficulty === option.id ? styles.on : ''}`}
-                  aria-pressed={difficulty === option.id}
-                  onClick={() => setDifficulty(option.id)}
+                  className={`${styles.rank} ${difficulty === rank.id ? styles.on : ''}`}
+                  aria-pressed={difficulty === rank.id}
+                  onClick={() => setDifficulty(rank.id)}
                 >
-                  {option.label}
+                  <span className={styles.rankHead}>
+                    <span className={styles.rankName}>{rank.label}</span>
+                    <span className={`${styles.badge} mono-num`}>{gridBadge(rank)}</span>
+                  </span>
+                  <span className={styles.rankStakes}>{rank.stakes}</span>
+                  {rank.caution && (
+                    <span className={styles.rankCaution}>{rank.caution}</span>
+                  )}
                 </button>
               ))}
             </div>
-            <p className={styles.note}>
-              {DIFFICULTIES.find((d) => d.id === difficulty)!.note}
-            </p>
           </fieldset>
 
           <div className={styles.toggle}>
@@ -127,6 +130,7 @@ export default function Briefing({ settings, onDeploy }: BriefingProps) {
           <button type="submit" className={`btn btn-primary ${styles.deploy}`}>
             {copy.primaryCta}
           </button>
+          <p className={styles.note}>{rules.stakes}</p>
         </form>
 
         <footer className={styles.foot}>A single-match fleet action. No accounts.</footer>

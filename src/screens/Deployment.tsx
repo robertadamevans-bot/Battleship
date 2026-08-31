@@ -2,27 +2,40 @@ import { useMemo, useRef, useState } from 'react'
 import Board from '../components/Board'
 import type { CellView } from '../game/views'
 import { key, shipCells } from '../game/geometry'
-import { checkPlacement, randomFleet, withPlacement } from '../game/placement'
-import { FLEET, type Cell, type Orientation, type Placement, type ShipId } from '../game/types'
+import { checkPlacement, randomFleet, withPlacement, type PlacementRules } from '../game/placement'
+import type { Ruleset } from '../game/rules'
+import type { Cell, Orientation, Placement, ShipId } from '../game/types'
 import { useTheme } from '../theme/useTheme'
 import styles from './Deployment.module.css'
 
 interface DeploymentProps {
   commander: string
+  rules: Ruleset
   initial: Placement[]
   onEngage: (placements: Placement[]) => void
   onBack: () => void
 }
 
-const nextUnplaced = (placements: Placement[]): ShipId | null =>
-  FLEET.find((s) => !placements.some((p) => p.id === s.id))?.id ?? null
-
-export default function Deployment({ commander, initial, onEngage, onBack }: DeploymentProps) {
+export default function Deployment({
+  commander,
+  rules,
+  initial,
+  onEngage,
+  onBack,
+}: DeploymentProps) {
   const { copy } = useTheme()
   const alias = copy.shipAlias
+  const fleet = rules.fleet
+  const placing: PlacementRules = useMemo(
+    () => ({ grid: rules.humanGrid, minShipGap: rules.minShipGap }),
+    [rules],
+  )
+  const nextUnplaced = (list: Placement[]): ShipId | null =>
+    fleet.find((s) => !list.some((p) => p.id === s.id))?.id ?? null
+
   const [placements, setPlacements] = useState<Placement[]>(initial)
   const [selected, setSelected] = useState<ShipId | null>(
-    nextUnplaced(initial) ?? FLEET[0].id,
+    nextUnplaced(initial) ?? fleet[0].id,
   )
   const [orientation, setOrientation] = useState<Orientation>('horizontal')
   const [aim, setAim] = useState<Cell | null>(null)
@@ -31,25 +44,34 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
   const pressed = useRef<{ cell: Cell; id: ShipId } | null>(null)
   const refuseTimer = useRef<number | undefined>(undefined)
 
+  const spec = (id: ShipId) => fleet.find((s) => s.id === id)!
   const placed = placements.length
-  const ready = placed === FLEET.length
+  const ready = placed === fleet.length
 
   function refuse(cells: Cell[], reason: string) {
     window.clearTimeout(refuseTimer.current)
-    setRefused({ cells: cells.map(key), nonce: Date.now() })
+    setRefused((prev) => ({ cells: cells.map(key), nonce: (prev?.nonce ?? 0) + 1 }))
     setMessage(reason)
     refuseTimer.current = window.setTimeout(() => setRefused(null), 420)
   }
 
   function place(stem: Cell, id: ShipId, facing: Orientation = orientation) {
-    const candidate: Placement = { id, orientation: facing, ...stem }
-    const check = checkPlacement(placements, candidate)
+    const ship = spec(id)
+    const candidate: Placement = {
+      id,
+      orientation: facing,
+      length: ship.length,
+      ...stem,
+    }
+    const check = checkPlacement(placements, candidate, placing)
     if (check.error) {
       refuse(
         check.cells,
         check.error === 'off-board'
           ? 'That ship would hang off the board.'
-          : 'Ships may touch, but not overlap.',
+          : check.error === 'too-close'
+            ? 'Ships need a clear cell all round, corners included.'
+            : 'Ships may touch, but not overlap.',
       )
       return
     }
@@ -58,9 +80,7 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
     const following = nextUnplaced(next)
     setSelected(following)
     setMessage(
-      following
-        ? `${alias[following]} next.`
-        : 'Fleet deployed. Engage when ready.',
+      following ? `${alias[following]} next.` : 'Fleet deployed. Engage when ready.',
     )
   }
 
@@ -103,7 +123,16 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
       for (const cell of shipCells(placement)) map.set(key(cell), 'ship')
     }
     if (selected && aim) {
-      const check = checkPlacement(placements, { id: selected, orientation, ...aim })
+      const check = checkPlacement(
+        placements,
+        {
+          id: selected,
+          orientation,
+          length: fleet.find((s) => s.id === selected)!.length,
+          ...aim,
+        },
+        placing,
+      )
       for (const cell of check.cells) {
         map.set(key(cell), check.error ? 'ghost-bad' : 'ghost')
       }
@@ -112,13 +141,15 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
       for (const k of refused.cells) map.set(k, 'ghost-bad')
     }
     return map
-  }, [placements, selected, aim, orientation, refused])
+  }, [placements, selected, aim, orientation, refused, placing, fleet])
+
+  const cells = rules.fleet.reduce((sum, ship) => sum + ship.length, 0)
 
   return (
     <main className={styles.screen}>
       <header className={styles.head}>
         <div>
-          <span className="eyebrow">Deployment</span>
+          <span className="eyebrow">Deployment · {rules.rank}</span>
           <h2 className={styles.title}>{commander}&rsquo;s water</h2>
         </div>
         <button type="button" className={styles.back} onClick={onBack}>
@@ -126,12 +157,21 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
         </button>
       </header>
 
-      <p className={styles.rules}>{copy.rules}</p>
+      <p className={styles.rules}>
+        {rules.minShipGap === 1 ? copy.spacedRules : copy.rules}{' '}
+        <span className="mono-num">
+          {cells} cells.
+          {rules.matchShotBudgetHuman === null
+            ? ''
+            : ` ${rules.matchShotBudgetHuman} shots.`}
+        </span>
+      </p>
 
       <div className={styles.layout}>
         <div className={styles.boardWrap}>
           <Board
             name="Your water — place your fleet"
+            grid={rules.humanGrid}
             views={views}
             interactive
             onFire={onCellClick}
@@ -144,7 +184,7 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
 
         <div className={styles.side}>
           <ul className={styles.tray}>
-            {FLEET.map((ship) => {
+            {fleet.map((ship) => {
               const done = placements.some((p) => p.id === ship.id)
               const active = selected === ship.id
               return (
@@ -185,8 +225,7 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
               type="button"
               className="btn"
               onClick={() => {
-                const fleet = randomFleet(Math.random)
-                setPlacements(fleet)
+                setPlacements(randomFleet(fleet, placing, Math.random))
                 setSelected(null)
                 setMessage('Fleet scattered. Engage when ready.')
               }}
@@ -198,8 +237,8 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
               className="btn"
               onClick={() => {
                 setPlacements([])
-                setSelected(FLEET[0].id)
-                setMessage(`Board cleared. ${alias.carrier} first.`)
+                setSelected(fleet[0].id)
+                setMessage(`Board cleared. ${alias[fleet[0].id]} first.`)
               }}
             >
               Reset
@@ -216,7 +255,7 @@ export default function Deployment({ commander, initial, onEngage, onBack }: Dep
             disabled={!ready}
             onClick={() => ready && onEngage(placements)}
           >
-            {ready ? copy.engage : `${placed}/5 ships placed`}
+            {ready ? copy.engage : `${placed}/${fleet.length} ships placed`}
           </button>
         </div>
       </div>

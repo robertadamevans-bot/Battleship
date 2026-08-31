@@ -38,11 +38,19 @@
 
 .layout {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 
+/* A wide board must shrink to the column, not push the phone sideways. */
+.boardWrap {
+  min-width: 0;
+}
+
 .side {
+  min-width: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   align-content: start;
 }
@@ -52,6 +60,7 @@
   margin: 0;
   padding: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
 }
 
@@ -59,7 +68,7 @@
   width: 100%;
   min-height: 46px;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 10px;
   padding: 0 12px;
@@ -83,6 +92,8 @@
 }
 
 .shipName {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 14px;
   color: var(--paper);
 }
@@ -118,11 +129,12 @@
 
 .controls {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
 .controls .btn {
+  min-width: 0;
   padding: 0 6px;
   font-size: 10.5px;
   letter-spacing: 0.06em;

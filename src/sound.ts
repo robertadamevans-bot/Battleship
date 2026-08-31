@@ -16,7 +16,7 @@ interface Voice {
  * digital ticks for the console, water and cannon for the pirates.
  */
 const VOICES: Record<Theme, Record<Cue, Voice>> = {
-  solent: {
+  armada: {
     miss: { frequency: 220, duration: 0.12, type: 'sine', gain: 0.05 },
     hit: { frequency: 96, duration: 0.2, type: 'square', gain: 0.07 },
     sunk: { frequency: 62, duration: 0.5, type: 'sawtooth', gain: 0.08 },

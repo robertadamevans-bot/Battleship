@@ -16,9 +16,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.dataset.theme = theme
     const spec = THEME_SPECS.find((t) => t.id === theme)!
     document.title =
-      theme === 'solent'
-        ? 'Solent — fleet action, human vs machine'
-        : `Solent — ${spec.name}`
+      theme === 'armada' ? 'Armada — Fleet action' : `Armada — ${spec.name}`
   }, [theme])
 
   const value = useMemo(
