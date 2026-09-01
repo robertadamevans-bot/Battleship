@@ -22,13 +22,6 @@ const VOICES: Record<Theme, Record<Cue, Voice>> = {
     sunk: { frequency: 62, duration: 0.5, type: 'sawtooth', gain: 0.08 },
     lose: { frequency: 48, duration: 0.7, type: 'triangle', gain: 0.09 },
   },
-  olde: {
-    // Muffled thump, dry crack of timber, a short drum.
-    miss: { frequency: 130, duration: 0.16, type: 'sine', gain: 0.06 },
-    hit: { frequency: 180, duration: 0.1, type: 'square', gain: 0.06 },
-    sunk: { frequency: 74, duration: 0.42, type: 'triangle', gain: 0.09 },
-    lose: { frequency: 58, duration: 0.8, type: 'triangle', gain: 0.09 },
-  },
   warfare: {
     // Sonar tick, suppressed digital crack, two-tone confirm.
     miss: { frequency: 1180, duration: 0.06, type: 'sine', gain: 0.04 },

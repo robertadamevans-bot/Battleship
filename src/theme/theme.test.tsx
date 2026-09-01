@@ -30,8 +30,8 @@ function briefing() {
 }
 
 describe('theme tokens', () => {
-  it('offers all four theatres with the default Armada skin first', () => {
-    expect(THEME_SPECS.map((t) => t.id)).toEqual(['armada', 'olde', 'warfare', 'pirates'])
+  it('offers all three theatres with the default Armada skin first', () => {
+    expect(THEME_SPECS.map((t) => t.id)).toEqual(['armada', 'warfare', 'pirates'])
     expect(THEMES).toContain('armada')
   })
 
@@ -51,13 +51,12 @@ describe('theme tokens', () => {
     const user = userEvent.setup()
     render(briefing())
     expect(document.title).toBe('Armada — Fleet action')
-    await user.click(screen.getByRole('button', { name: /ye olde times/i }))
-    expect(document.title).toBe('Armada — Ye Olde Times')
+    await user.click(screen.getByRole('button', { name: /modern warfare/i }))
+    expect(document.title).toBe('Armada — Modern Warfare')
   })
 
   it('words the same result differently per theatre', () => {
     expect(resolutionLine(hit, themeCopy.armada)).toBe('B7 — you sank the Cruiser')
-    expect(resolutionLine(hit, themeCopy.olde)).toBe('B7 — thou hast sunk the Frigate')
     expect(resolutionLine(hit, themeCopy.pirates)).toBe("B7 — you've sent the Brig under")
     expect(resolutionLine({ ...hit, by: 'ai' }, themeCopy.warfare)).toBe(
       'B7 own unit lost — cruiser',
@@ -105,9 +104,12 @@ describe('remembered settings', () => {
     expect(storedTheme()).toBe('warfare')
   })
 
-  it('falls back to Armada when the stored theatre was the old default id', () => {
+  it('falls back to Armada for a retired or unknown theatre id', () => {
     window.localStorage.setItem('solent.theme', 'solent')
     expect(storedTheme()).toBe('armada')
+    window.localStorage.setItem('armada.theme', 'olde')
+    expect(storedTheme()).toBe('armada')
+    expect(window.localStorage.getItem('armada.theme')).toBe('armada')
   })
 
   it('defaults an unknown or absent rank to Officer', () => {

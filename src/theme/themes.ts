@@ -1,6 +1,6 @@
 import type { ShipId } from '../game/types'
 
-export const THEMES = ['armada', 'olde', 'warfare', 'pirates'] as const
+export const THEMES = ['armada', 'warfare', 'pirates'] as const
 
 export type Theme = (typeof THEMES)[number]
 
@@ -22,12 +22,6 @@ export const THEME_SPECS: readonly ThemeSpec[] = [
     name: 'Armada',
     flavour: 'Cold water. Short orders.',
     swatch: ['#101820', '#c8102e', '#7c9a82'],
-  },
-  {
-    id: 'olde',
-    name: 'Ye Olde Times',
-    flavour: 'Oak, powder, and lettered shot.',
-    swatch: ['#e7d8b8', '#8b1e1e', '#6e6a60'],
   },
   {
     id: 'warfare',
@@ -129,45 +123,6 @@ export const themeCopy: Record<Theme, ThemeCopy> = {
     oneLifeLoss: (ship) => `Your ${ship} is gone. One life. Action over.`,
     ghostHit: (c) => `${c} — ghost contact`,
     ghostSunk: (c) => `${c} — decoy struck`,
-  },
-  olde: {
-    primaryCta: 'Deploy thy fleet',
-    engage: 'Engage',
-    miss: (c) => `${c} misses the mark`,
-    hit: (c) => `${c} finds timber`,
-    sunk: (c, ship) => `${c} — thou hast sunk the ${ship}`,
-    theirMiss: (c) => `North: ${c} misses the mark`,
-    theirHit: (c) => `North: ${c} finds thy timber`,
-    theirSunk: (c, ship) => `${c} — thy ${ship} is lost`,
-    aiName: 'Admiral North, RN',
-    yourTurn: (commander) => `${commander}, give the order`,
-    theirTurn: 'Admiral North takes the range',
-    youWin: 'carries the day',
-    youLose: 'The action is concluded. North carries the day.',
-    shipAlias: {
-      carrier: 'Flagship',
-      battleship: 'Ship of the Line',
-      cruiser: 'Frigate',
-      submarine: 'Bomb Ketch',
-      destroyer: 'Sloop',
-      patrol: 'Cutter',
-      'decoy-a': 'Phantom',
-      'decoy-b': 'Phantom',
-    },
-    rules: 'Athwart or along. No two ships in one berth. Touching permitted.',
-    spacedRules: 'Athwart or along. Clear water all round, corners besides.',
-    waiting: 'Await thy order.',
-    closing: () => 'The action is concluded.',
-    rematch: 'Engage again',
-    standDown: 'Return to the briefing',
-    powderLabel: 'Powder',
-    clockLabel: 'Glass',
-    powderSpent: 'Powder spent. The action is lost.',
-    timeUp: 'The glass is run. A shot is taken for thee.',
-    oneLifeBanner: 'One life. The first ship lost concludes the action.',
-    oneLifeLoss: (ship) => `Thy ${ship} is lost. One life. The action is over.`,
-    ghostHit: (c) => `${c} — a phantom on the chart`,
-    ghostSunk: (c) => `${c} — a phantom, nothing more`,
   },
   warfare: {
     primaryCta: 'Deploy fleet',

@@ -40,7 +40,7 @@ function readMigrated(key: string): string | null {
 export function storedTheme(): Theme {
   const stored = readMigrated(THEME_KEY)
   if (isTheme(stored)) return stored
-  // The default theatre itself was called solent before the rename.
+  // Covers the old `solent` default id and any theatre since retired.
   if (stored !== null) write(THEME_KEY, DEFAULT_THEME)
   return DEFAULT_THEME
 }
