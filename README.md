@@ -75,7 +75,7 @@ buttons: arrow keys move the aim, Enter or Space fires, focus survives the turn 
 
 ## Theatres
 
-Four visual themes — Armada (original), Ye Olde Times, Modern Warfare, Pirates of the Caribbean —
+Three visual themes — Armada (original), Modern Warfare, Pirates of the Caribbean —
 picked on the briefing screen and switchable mid-match from the header. A theatre is one
 `data-theme` attribute on `<html>` plus the CSS custom properties in `src/styles/global.css`; there
 is no per-theme route, component or board, and no hex values live in the components. Tone shifts

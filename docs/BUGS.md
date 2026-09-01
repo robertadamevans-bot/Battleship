@@ -142,8 +142,8 @@ the same half hour.
 
 ## 9. Switching theatre mid-match left the previous theatre talking
 
-**Symptom.** With the theme pack in, firing three shots in the default theatre and then switching to Ye Olde
-Times left the signal log reading `F6 miss` and `North: D3 hit` above a banner that now said
+**Symptom.** With the theme pack in, firing three shots in the default theatre and then switching to another
+one (Ye Olde Times, since retired) left the signal log reading `F6 miss` and `North: D3 hit` above a banner that now said
 *Admiral North takes the range*. Half the screen was in the old voice.
 
 **Cause.** The match log stored finished sentences — `describe(result, by)` was called at the moment
